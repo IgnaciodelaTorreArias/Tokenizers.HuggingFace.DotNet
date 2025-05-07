@@ -52,7 +52,7 @@ jobs:
       - name: install packages
         run: |
           sudo apt update
-          sudo apt install -y clang unzip gcc-aarch64-linux-gnu
+          sudo apt install -y clang unzip gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
       - name: install protoc
         run: |
           PROTOC_ZIP="protoc-30.2-linux-x86_64.zip"
