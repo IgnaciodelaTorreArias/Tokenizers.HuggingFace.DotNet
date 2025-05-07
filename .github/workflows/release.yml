@@ -2,6 +2,9 @@ name: Release
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        required: true
 env:
   PROTOC_VERSION: 30.2
 
@@ -154,7 +157,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-      - run: ls -R
       - name: set up .NET SDK
         uses: actions/setup-dotnet@v4
         with:
@@ -185,9 +187,19 @@ jobs:
           name: linux-arm64
           path: runtimes/linux-arm64/native
       - name: run dotnet pack
-        run: dotnet pack DotNet.HuggingFace.Tokenizers.csproj -c Release
+        run: dotnet pack DotNet.HuggingFace.Tokenizers.csproj -c Release -p:PackageVersion=${{ inputs.version }}
       - name: upload .nupkg
         uses: actions/upload-artifact@v4
         with:
           name: DotNet.HuggingFace.Tokenizers
           path: bin/Release/*.nupkg
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release v${{ inputs.version }}
+          tag_name: v${{ github.ref_name }}
+          draft: false
+          files: |
+            bin/Release/*.nupkg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
