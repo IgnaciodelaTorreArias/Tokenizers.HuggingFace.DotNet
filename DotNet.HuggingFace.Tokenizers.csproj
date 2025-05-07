@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="tokenizers_proto\protos\Error.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
+    <Protobuf Include="tokenizers_proto\protos\error.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
     <Protobuf Include="tokenizers_proto\protos\tokenizer.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
     <Protobuf Include="tokenizers_proto\protos\utils.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
     <!--Normalizers-->
