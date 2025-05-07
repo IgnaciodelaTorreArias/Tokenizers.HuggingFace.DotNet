@@ -3,7 +3,7 @@ name: Release
 on:
   workflow_dispatch:
 env:
-  PROTOC: '30.2'
+  PROTOC: 30.2
 
 jobs:
   build-windows:
@@ -35,6 +35,7 @@ jobs:
         with:
           targets: ${{ matrix.target }}
       - name: cache protoc
+        id: cache-protoc
         uses: actions/cache@v4
         with:
           path: ~/.protoc
@@ -87,6 +88,7 @@ jobs:
           sudo apt update
           sudo apt install -y clang unzip gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
       - name: cache protoc
+        id: cache-protoc
         uses: actions/cache@v4
         with:
           path: ~/.protoc
@@ -139,6 +141,7 @@ jobs:
         with:
           targets: ${{ matrix.target }}
       - name: cache protoc
+        id: cache-protoc
         uses: actions/cache@v4
         with:
           path: ~/.protoc
