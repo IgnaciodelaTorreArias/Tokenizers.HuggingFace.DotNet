@@ -9,7 +9,6 @@
     <Description>Bindings for rust huggingface/tokenizers.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <Version>0.1.0</Version>
     <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64;win-arm64;linux-arm64;</RuntimeIdentifiers>
   </PropertyGroup>
 
