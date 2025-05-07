@@ -41,10 +41,10 @@ jobs:
         include:
           - target: x86_64-unknown-linux-gnu
             runtime: linux-x64
-            flags: RUSTFLAGS=""
+            flags: RUSTFLAGS="-C linker=/usr/bin/clang"
           - target: aarch64-unknown-linux-gnu
             runtime: linux-arm64
-            flags: RUSTFLAGS="-C link-arg=--target=aarch64-linux-gnu -C link-arg=--gcc-toolchain=/usr"
+            flags: RUSTFLAGS="-C linker=/usr/bin/clang -C link-arg=--target=aarch64-linux-gnu -C link-arg=--gcc-toolchain=/usr"
     steps:
       - uses: actions/checkout@v4
         with:
