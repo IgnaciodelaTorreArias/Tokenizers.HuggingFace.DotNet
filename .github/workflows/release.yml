@@ -3,7 +3,7 @@ name: Release
 on:
   workflow_dispatch:
 env:
-  PROTOC: 30.2
+  PROTOC_VERSION: 30.2
 
 jobs:
   build-windows:
@@ -39,12 +39,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: $HOME\.protoc
-          key: ${{ runner.os }}-protoc-${{ env.PROTOC }}
+          key: ${{ runner.os }}-protoc-${{ env.PROTOC_VERSION }}
       - name: install protoc
         if: steps.cache-protoc.outputs.cache-hit != 'true'
         run: |
-          $PROTOC_ZIP = "protoc-${{ env.PROTOC }}-win64.zip"
-          Invoke-WebRequest -Uri "https://github.com/protocolbuffers/protobuf/releases/download/v${{ env.PROTOC }}/$PROTOC_ZIP" -OutFile $PROTOC_ZIP
+          $PROTOC_ZIP = "protoc-${{ env.PROTOC_VERSION }}-win64.zip"
+          Invoke-WebRequest -Uri "https://github.com/protocolbuffers/protobuf/releases/download/v${{ env.PROTOC_VERSION }}/$PROTOC_ZIP" -OutFile $PROTOC_ZIP
           Expand-Archive -Path $PROTOC_ZIP -DestinationPath "$HOME\.protoc"
       - name: update path
         run: Add-Content $env:GITHUB_PATH "$HOME\.protoc\bin"
@@ -92,12 +92,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: "$HOME/.protoc"
-          key: ${{ runner.os }}-protoc-${{ env.PROTOC }}
+          key: ${{ runner.os }}-protoc-${{ env.PROTOC_VERSION }}
       - name: install protoc
         if: steps.cache-protoc.outputs.cache-hit != 'true'
         run: |
-          PROTOC_ZIP="protoc-${{ env.PROTOC }}-linux-x86_64.zip"
-          curl -LO "https://github.com/protocolbuffers/protobuf/releases/download/v${{ env.PROTOC }}/$PROTOC_ZIP"
+          PROTOC_ZIP="protoc-${{ env.PROTOC_VERSION }}-linux-x86_64.zip"
+          curl -LO "https://github.com/protocolbuffers/protobuf/releases/download/v${{ env.PROTOC_VERSION }}/$PROTOC_ZIP"
           unzip $PROTOC_ZIP -d $HOME/.protoc
       - name: update path
         run: echo "$HOME/.protoc/bin" >> $GITHUB_PATH
@@ -145,12 +145,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: "$HOME/.protoc"
-          key: ${{ runner.os }}-protoc-${{ env.PROTOC }}
+          key: ${{ runner.os }}-protoc-${{ env.PROTOC_VERSION }}
       - name: install protoc
         if: steps.cache-protoc.outputs.cache-hit != 'true'
         run: |
-          PROTOC_ZIP="protoc-${{ env.PROTOC }}-osx-aarch_64.zip"
-          curl -LO "https://github.com/protocolbuffers/protobuf/releases/download/v${{ env.PROTOC }}/$PROTOC_ZIP"
+          PROTOC_ZIP="protoc-${{ env.PROTOC_VERSION }}-osx-aarch_64.zip"
+          curl -LO "https://github.com/protocolbuffers/protobuf/releases/download/v${{ env.PROTOC_VERSION }}/$PROTOC_ZIP"
           unzip $PROTOC_ZIP -d $HOME/.protoc
       - name: update path
         run: echo "$HOME/.protoc/bin" >> $GITHUB_PATH
