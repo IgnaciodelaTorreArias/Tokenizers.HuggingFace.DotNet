@@ -58,7 +58,8 @@ jobs:
           PROTOC_ZIP="protoc-30.2-linux-x86_64.zip"
           curl -LO "https://github.com/protocolbuffers/protobuf/releases/download/v30.2/$PROTOC_ZIP"
           unzip $PROTOC_ZIP -d $HOME/.protoc
-          export PATH="$PATH:$HOME/.protoc/bin"
+      - name: update path
+        run: echo "$HOME/.protoc/bin" >> $GITHUB_PATH
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
@@ -91,7 +92,8 @@ jobs:
           PROTOC_ZIP="protoc-30.2-osx-aarch_64.zip"
           curl -LO "https://github.com/protocolbuffers/protobuf/releases/download/v30.2/$PROTOC_ZIP"
           unzip $PROTOC_ZIP -d $HOME/.protoc
-          export PATH="$PATH:$HOME/.protoc/bin"
+      - name: update path
+        run: echo "$HOME/.protoc/bin" >> $GITHUB_PATH
       - name: Build Rust .dylib
         run: cargo build --manifest-path tokenizers_proto/Cargo.toml --release --target ${{ matrix.target }}
       - name: Upload .dylib
