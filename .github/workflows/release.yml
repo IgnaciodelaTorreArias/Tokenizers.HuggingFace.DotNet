@@ -57,16 +57,13 @@ jobs:
         run: |
           PROTOC_ZIP="protoc-30.2-linux-x86_64.zip"
           curl -LO "https://github.com/protocolbuffers/protobuf/releases/download/v30.2/$PROTOC_ZIP"
-          unzip $PROTOC_ZIP -d $HOME/.local
-          export PATH="$PATH:$HOME/.local/bin"
+          unzip $PROTOC_ZIP -d $HOME/.protoc
+          export GITHUB_PATH="$GITHUB_PATH:$HOME/.protoc/bin"
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
       - name: Build Rust .so
-        run: |
-          export CC=clang
-          export CXX=clang++
-          ${{ matrix.flags }} cargo build --manifest-path tokenizers_proto/Cargo.toml --release --target ${{ matrix.target }}
+        run: ${{ matrix.flags }} cargo build --manifest-path tokenizers_proto/Cargo.toml --release --target ${{ matrix.target }}
       - name: Upload .so
         uses: actions/upload-artifact@v4
         with:
@@ -89,6 +86,12 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
+      - name: install protoc
+        run: |
+          PROTOC_ZIP="protoc-30.2-osx-aarch_64.zip"
+          curl -LO "https://github.com/protocolbuffers/protobuf/releases/download/v30.2/$PROTOC_ZIP"
+          unzip $PROTOC_ZIP -d $HOME/.protoc
+          export GITHUB_PATH="$GITHUB_PATH:$HOME/.protoc/bin"
       - name: Build Rust .dylib
         run: cargo build --manifest-path tokenizers_proto/Cargo.toml --release --target ${{ matrix.target }}
       - name: Upload .dylib
@@ -118,9 +121,6 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '6.0.428'
-      - name: Prepare runtimes folder
-        run: |
-          mkdir -p runtimes/${{ matrix.runtime }}/native
       - name: Download runtimes
         uses: actions/download-artifact@v4
         with:
