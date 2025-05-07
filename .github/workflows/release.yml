@@ -34,12 +34,6 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
-      - name: cache protoc
-        id: cache-protoc
-        uses: actions/cache@v4
-        with:
-          path: $HOME\.protoc
-          key: ${{ runner.os }}-protoc-${{ env.PROTOC_VERSION }}
       - name: install protoc
         if: steps.cache-protoc.outputs.cache-hit != 'true'
         run: |
@@ -87,12 +81,6 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y clang unzip gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
-      - name: cache protoc
-        id: cache-protoc
-        uses: actions/cache@v4
-        with:
-          path: "$HOME/.protoc"
-          key: ${{ runner.os }}-protoc-${{ env.PROTOC_VERSION }}
       - name: install protoc
         if: steps.cache-protoc.outputs.cache-hit != 'true'
         run: |
@@ -140,12 +128,6 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
-      - name: cache protoc
-        id: cache-protoc
-        uses: actions/cache@v4
-        with:
-          path: "$HOME/.protoc"
-          key: ${{ runner.os }}-protoc-${{ env.PROTOC_VERSION }}
       - name: install protoc
         if: steps.cache-protoc.outputs.cache-hit != 'true'
         run: |
