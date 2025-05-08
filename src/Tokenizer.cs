@@ -8,7 +8,7 @@ using Normalizer = Tokenizers.Normalizers.Normalizer;
 using PreTokenizer = Tokenizers.PreTokenizers.PreTokenizer;
 using Trainer = Tokenizers.Trainers.Trainer;
 
-namespace DotNet.HuggingFace.Tokenizers.Tokenizer;
+namespace Tokenizers.HuggingFace.Tokenizer;
 
 internal static class TokenizerForeignFunctions
 {
