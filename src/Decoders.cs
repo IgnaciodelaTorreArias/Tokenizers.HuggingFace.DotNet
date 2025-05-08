@@ -1,7 +1,7 @@
 ﻿using Messages.Decoders;
 using PrependScheme = Messages.PreTokenizers.PrependScheme;
 
-namespace DotNet.HuggingFace.Tokenizers.Decoders;
+namespace Tokenizers.Decoders;
 
 public abstract class Decoder
 {

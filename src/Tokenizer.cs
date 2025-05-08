@@ -4,9 +4,9 @@ using Messages.Tokenizer;
 using Messages.Trainers;
 using ProcessorWrapperParams = Messages.Processors.ProcessorWrapperParams;
 using DecoderWrapperParams = Messages.Decoders.DecoderWrapperParams;
-using Normalizer = DotNet.HuggingFace.Tokenizers.Normalizers.Normalizer;
-using PreTokenizer = DotNet.HuggingFace.Tokenizers.PreTokenizers.PreTokenizer;
-using Trainer = DotNet.HuggingFace.Tokenizers.Trainers.Trainer;
+using Normalizer = Tokenizers.Normalizers.Normalizer;
+using PreTokenizer = Tokenizers.PreTokenizers.PreTokenizer;
+using Trainer = Tokenizers.Trainers.Trainer;
 
 namespace DotNet.HuggingFace.Tokenizers.Tokenizer;
 

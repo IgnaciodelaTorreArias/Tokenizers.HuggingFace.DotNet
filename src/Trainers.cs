@@ -2,7 +2,7 @@
 
 using Messages.Trainers;
 
-namespace DotNet.HuggingFace.Tokenizers.Trainers;
+namespace Tokenizers.Trainers;
 
 public abstract class Trainer {
     internal TrainerParams.TrainerOneofCase trainer_type;

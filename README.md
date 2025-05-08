@@ -1,11 +1,11 @@
-# DotNet.HuggingFace.Tokenizers
+# Tokenizers.HuggingFace
 
 .NET bindings for [huggingface/tokenizers](https://github.com/huggingface/tokenizers) using protobufs for comunication and C-ABI.
 
 ## How to install
 
 ```ps
-dotnet add package DotNet.HuggingFace.Tokenizers
+dotnet add package Tokenizers.HuggingFace
 ```
 
 ## Supported targets

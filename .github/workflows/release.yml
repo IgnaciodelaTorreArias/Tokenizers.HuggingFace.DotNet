@@ -192,13 +192,13 @@ jobs:
           name: linux-arm64
           path: runtimes/linux-arm64/native
       - name: run dotnet pack
-        run: dotnet pack DotNet.HuggingFace.Tokenizers.csproj -c Release -p:PackageVersion=${{ inputs.version }}
+        run: dotnet pack Tokenizers.HuggingFace.csproj -c Release -p:PackageVersion=${{ inputs.version }}
       - name: publish to nuget
         run: dotnet nuget push **/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
       - name: upload .nupkg
         uses: actions/upload-artifact@v4
         with:
-          name: DotNet.HuggingFace.Tokenizers
+          name: Tokenizers.HuggingFace
           path: bin/Release/*.nupkg
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1

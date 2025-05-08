@@ -2,7 +2,7 @@
 
 using Messages.Processors;
 
-namespace DotNet.HuggingFace.Tokenizers.Processors;
+namespace Tokenizers.Processors;
 
 public abstract class Processor
 {
