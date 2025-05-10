@@ -4,9 +4,9 @@ using Messages.Tokenizer;
 using Messages.Trainers;
 using ProcessorWrapperParams = Messages.Processors.ProcessorWrapperParams;
 using DecoderWrapperParams = Messages.Decoders.DecoderWrapperParams;
-using Normalizer = Tokenizers.Normalizers.Normalizer;
-using PreTokenizer = Tokenizers.PreTokenizers.PreTokenizer;
-using Trainer = Tokenizers.Trainers.Trainer;
+using Normalizer = Tokenizers.HuggingFace.Normalizers.Normalizer;
+using PreTokenizer = Tokenizers.HuggingFace.PreTokenizers.PreTokenizer;
+using Trainer = Tokenizers.HuggingFace.Trainers.Trainer;
 
 namespace Tokenizers.HuggingFace.Tokenizer;
 
@@ -115,22 +115,24 @@ public class Tokenizer : ForeignInstance, ITokenizerEncode, ITokenizerDecode
 
     public EncodeResult Encode(string input, bool add_special_tokens, string? input2 = null, bool include_type_ids = false, bool include_tokens = false, bool include_words = false, bool include_offsets = false, bool include_special_tokens_mask = false, bool include_attention_mask = false, bool include_overflowing = false)
     {
+        var encode_params = new EncodeParams
+        {
+            Input = input,
+            AddSpecialTokens = add_special_tokens,
+            IncludeTypeIds = include_type_ids,
+            IncludeTokens = include_tokens,
+            IncludeWords = include_words,
+            IncludeOffsets = include_offsets,
+            IncludeSpecialTokensMask = include_special_tokens_mask,
+            IncludeAttentionMask = include_attention_mask,
+            IncludeOverflowing = include_overflowing
+        };
+        if (input2 != null)
+            encode_params.Input2 = input2;
         return ForeignFunctions.MethodArgsResult<EncodeResult, EncodeParams>(
             TokenizerForeignFunctions.encode,
             InstancePtr,
-            new EncodeParams
-            {
-                Input = input,
-                AddSpecialTokens = add_special_tokens,
-                Input2 = input2,
-                IncludeTypeIds = include_type_ids,
-                IncludeTokens = include_tokens,
-                IncludeWords = include_words,
-                IncludeOffsets = include_offsets,
-                IncludeSpecialTokensMask = include_special_tokens_mask,
-                IncludeAttentionMask = include_attention_mask,
-                IncludeOverflowing = include_overflowing
-            },
+            encode_params,
             EncodeResult.Parser
         );
     }

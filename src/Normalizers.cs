@@ -3,7 +3,7 @@
 using Google.Protobuf;
 using Messages.Normalizers;
 
-namespace Tokenizers.Normalizers;
+namespace Tokenizers.HuggingFace.Normalizers;
 
 internal static class NormalizersForeignFunctions
 {

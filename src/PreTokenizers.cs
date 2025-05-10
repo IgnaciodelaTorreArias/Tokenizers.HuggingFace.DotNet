@@ -2,7 +2,7 @@
 
 using Messages.PreTokenizers;
 
-namespace Tokenizers.PreTokenizers;
+namespace Tokenizers.HuggingFace.PreTokenizers;
 
 internal static class PreTokenizersForeignFunctions
 {

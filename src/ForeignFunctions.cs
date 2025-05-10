@@ -4,7 +4,7 @@ using Google.Protobuf;
 
 using Messages;
 
-namespace Tokenizers;
+namespace Tokenizers.HuggingFace;
 
 internal sealed class InvalidProtocolBufferException : IOException { }
 
