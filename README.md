@@ -107,7 +107,6 @@ static class SentenceSimilarityModel
     }
     static public double CosineSimilarity(float[] a, float[] b)
     {
-        float[] result = new float[384];
         int subVector = 384 / Vector<float>.Count;
         double ab = 0, aa = 0, bb = 0;
         for (int i = 0; i < subVector; i++)
@@ -118,7 +117,7 @@ static class SentenceSimilarityModel
             aa += Vector.Dot(vecA, vecA);
             bb += Vector.Dot(vecB, vecB);
         }
-        return ab / (aa * bb);
+        return ab / (Math.Sqrt(aa) * Math.Sqrt(bb));
     }
 }
 ```
