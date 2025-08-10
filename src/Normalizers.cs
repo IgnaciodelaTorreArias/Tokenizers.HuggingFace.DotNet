@@ -1,5 +1,5 @@
 ﻿using System.Runtime.InteropServices;
-
+using System.Text.RegularExpressions;
 using Google.Protobuf;
 using Messages.Normalizers;
 
@@ -22,7 +22,8 @@ internal interface INormalizer
 }
 public class Normalizer : ForeignInstance, INormalizer
 {
-    internal Normalizer(NormalizerWrapperParams param) {
+    internal Normalizer(NormalizerWrapperParams param)
+    {
         InstancePtr = ForeignFunctions.CreateNewArgsResult(
             NormalizersForeignFunctions.new_normalizer_wrapper,
             param
@@ -37,7 +38,7 @@ public class Normalizer : ForeignInstance, INormalizer
             NormalizeResult.Parser
         ).Normalized;
     }
-    internal override FreeDelegate FreeFunc() => 
+    internal override FreeDelegate FreeFunc() =>
         NormalizersForeignFunctions.free_normalizer_wrapper;
 }
 public class Bert : Normalizer
@@ -89,7 +90,7 @@ public class StripNormalizer : Normalizer
 {
     public readonly bool strip_left;
     public readonly bool strip_right;
-    public StripNormalizer(bool strip_left, bool strip_right) : 
+    public StripNormalizer(bool strip_left, bool strip_right) :
         base(new NormalizerWrapperParams
         {
             StripNormalizer =
@@ -146,12 +147,25 @@ public class Replace : Normalizer
         {
             Replace =
             {
-                Pattern = pattern,
+                StringReplacement = pattern,
                 Content = content
             }
         })
     {
         this.pattern = pattern;
+        this.content = content;
+    }
+    public Replace(Regex pattern, string content) :
+        base(new NormalizerWrapperParams
+        {
+            Replace =
+            {
+                RegexReplacement = pattern.ToString(),
+                Content = content
+            }
+        })
+    {
+        this.pattern = pattern.ToString();
         this.content = content;
     }
 }
@@ -161,7 +175,7 @@ public class Precompiled : Normalizer
     public Precompiled(byte[] precompiled_charsmap) :
         base(new NormalizerWrapperParams
         {
-            Precompiled = { PrecompiledCharsmap = ByteString.CopyFrom(precompiled_charsmap) } 
+            Precompiled = { PrecompiledCharsmap = ByteString.CopyFrom(precompiled_charsmap) }
         })
     {
         this.precompiled_charsmap = precompiled_charsmap;

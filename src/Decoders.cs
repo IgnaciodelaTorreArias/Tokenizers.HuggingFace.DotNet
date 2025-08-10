@@ -1,4 +1,6 @@
 ﻿using Messages.Decoders;
+using Messages.Normalizers;
+using System.Text.RegularExpressions;
 using PrependScheme = Messages.PreTokenizers.PrependScheme;
 
 namespace Tokenizers.HuggingFace.Decoders;
@@ -18,7 +20,7 @@ public abstract class Decoder
 public class Bpe : Decoder
 {
     public readonly string suffix;
-    public Bpe(string suffix  = "</w>") :
+    public Bpe(string suffix = "</w>") :
         base(new Params
         {
             BpeDecoder =
@@ -120,12 +122,25 @@ public class Replace : Decoder
         {
             Replace =
             {
-                Pattern = pattern,
+                StringReplacement = pattern,
                 Content = content
             }
         })
     {
         this.pattern = pattern;
+        this.content = content;
+    }
+    public Replace(Regex pattern, string content) :
+        base(new Params
+        {
+            Replace =
+            {
+                RegexReplacement = pattern.ToString(),
+                Content = content
+            }
+        })
+    {
+        this.pattern = pattern.ToString();
         this.content = content;
     }
 }

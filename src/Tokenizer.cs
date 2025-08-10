@@ -98,7 +98,7 @@ public class Tokenizer : ForeignInstance, ITokenizerEncode, ITokenizerDecode
         );
         return instance;
     }
-    
+
     public string Decode(IEnumerable<uint> ids, bool skip_special_tokens)
     {
         return ForeignFunctions.MethodArgsResult<DecodeResult, DecodeParams>(

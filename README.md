@@ -50,7 +50,7 @@ dotnet add package Tokenizers.HuggingFace
 - Add the following code to Program.cs
 
 ```csharp
-using System.Numerics;
+using System.Numerics.Tensors;
 
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
@@ -62,7 +62,7 @@ var a = SentenceSimilarityModel.GetEmbeddings("Hello, world");
 var b = SentenceSimilarityModel.GetEmbeddings("Hello, world, good to be here");
 
 Console.WriteLine($"E: {string.Join(',', a)}");
-Console.WriteLine($"a-b: {SentenceSimilarityModel.CosineSimilarity(a, b)}");
+Console.WriteLine($"a-b: {TensorPrimitives.CosineSimilarity(a, b)}");
 
 static class SentenceSimilarityModel
 {
@@ -87,37 +87,14 @@ static class SentenceSimilarityModel
         var (sequenceLenght, inputs) = PrepareInputs(text);
         using IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results = session.Run(inputs);
         var outputTensor = results.First().AsEnumerable<float>().ToArray();
-        int subVector = 384 / Vector<float>.Count;
-        float[] data = new float[384];
+        float[] result = new float[384];
         for (int i = 0; i < sequenceLenght; i++)
         {
-            for (int j = 0; j < subVector; j++)
-            {
-                Vector<float> result = new(data, j * Vector<float>.Count);
-                result += new Vector<float>(outputTensor, i * 384 + j * Vector<float>.Count);
-                result.CopyTo(data, j * Vector<float>.Count);
-            }
+            ReadOnlySpan<float> floats = new ReadOnlySpan<float>(outputTensor, i*384, 384);
+            TensorPrimitives.Add(floats, result, result);
         }
-        for (int i = 0; i < subVector; i++)
-        {
-            Vector<float> result = new Vector<float>(data, i * Vector<float>.Count)/sequenceLenght;
-            result.CopyTo(data, i * Vector<float>.Count);
-        }
-        return data;
-    }
-    static public double CosineSimilarity(float[] a, float[] b)
-    {
-        int subVector = 384 / Vector<float>.Count;
-        double ab = 0, aa = 0, bb = 0;
-        for (int i = 0; i < subVector; i++)
-        {
-            Vector<float> vecA = new(a, i * Vector<float>.Count);
-            Vector<float> vecB = new(b, i * Vector<float>.Count);
-            ab += Vector.Dot(vecA, vecB);
-            aa += Vector.Dot(vecA, vecA);
-            bb += Vector.Dot(vecB, vecB);
-        }
-        return ab / (Math.Sqrt(aa) * Math.Sqrt(bb));
+        TensorPrimitives.Divide(result, sequenceLenght, result);
+        return result;
     }
 }
 ```

@@ -4,7 +4,8 @@ using Messages.Trainers;
 
 namespace Tokenizers.HuggingFace.Trainers;
 
-public abstract class Trainer {
+public abstract class Trainer
+{
     internal TrainerParams.TrainerOneofCase trainer_type;
     internal IMessage message;
     internal Trainer(TrainerParams.TrainerOneofCase trainer_type, IMessage message)
@@ -50,7 +51,7 @@ public class Bpe : Trainer
         this.min_frequency = min_frequency;
         this.vocab_size = vocab_size;
         this.show_progress = show_progress;
-        this.special_tokens = special_tokens ??  Enumerable.Empty<Messages.AddedToken>();
+        this.special_tokens = special_tokens ?? Enumerable.Empty<Messages.AddedToken>();
         this.limit_alphabet = limit_alphabet;
         this.initial_alphabet = initial_alphabet;
         this.continuing_subword_prefix = continuing_subword_prefix;

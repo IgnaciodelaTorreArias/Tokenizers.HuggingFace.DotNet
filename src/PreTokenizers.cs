@@ -1,5 +1,5 @@
 ﻿using System.Runtime.InteropServices;
-
+using System.Text.RegularExpressions;
 using Messages.PreTokenizers;
 
 namespace Tokenizers.HuggingFace.PreTokenizers;
@@ -47,7 +47,7 @@ public class Bert : PreTokenizer
 {
     public Bert() : base(new PreTokenizerWrapperParams { BertPreTokenizer = { } }) { }
 }
-public class  ByteLeve : PreTokenizer
+public class ByteLeve : PreTokenizer
 {
     public readonly bool add_prefix_space;
     public readonly bool trim_offsets;
@@ -62,7 +62,7 @@ public class  ByteLeve : PreTokenizer
                 TrimOffsets = trim_offsets,
                 UseRegex = use_regex,
             }
-       })
+        })
     {
         this.add_prefix_space = add_prefix_space;
         this.trim_offsets = trim_offsets;
@@ -94,12 +94,14 @@ public class Metaspace : PreTokenizer
 public class Whitespace : PreTokenizer
 {
     public Whitespace() :
-        base(new PreTokenizerWrapperParams{ Whitespace = { } }) { }
+        base(new PreTokenizerWrapperParams { Whitespace = { } })
+    { }
 }
 public class WhitespaceSplit : PreTokenizer
 {
     public WhitespaceSplit() :
-        base(new PreTokenizerWrapperParams { WhitespaceSplit = { } }) { }
+        base(new PreTokenizerWrapperParams { WhitespaceSplit = { } })
+    { }
 }
 public class Delimiter : PreTokenizer
 {
@@ -143,13 +145,28 @@ public class Split : PreTokenizer
         {
             Split =
             {
-                Pattern = pattern,
+                StringSplit = pattern,
                 Behavior = behavior,
                 Invert = invert
             }
         })
     {
         this.pattern = pattern;
+        this.behavior = behavior;
+        this.invert = invert;
+    }
+    public Split(Regex pattern, SplitDelimiterBehavior behavior, bool invert) :
+        base(new PreTokenizerWrapperParams
+        {
+            Split =
+            {
+                RegexSplit = pattern.ToString(),
+                Behavior = behavior,
+                Invert = invert
+            }
+        })
+    {
+        this.pattern = pattern.ToString();
         this.behavior = behavior;
         this.invert = invert;
     }
@@ -189,4 +206,20 @@ public class Digits : PreTokenizer
 public class UnicodeScripts : PreTokenizer
 {
     public UnicodeScripts() : base(new PreTokenizerWrapperParams { UnicodeScripts = { } }) { }
+}
+public class FixedLength : PreTokenizer
+{
+    public readonly UInt64 length;
+
+    public FixedLength(UInt64 length = 5) :
+        base(new PreTokenizerWrapperParams
+        {
+            FixedLength =
+            {
+                Length = length
+            }
+        })
+    {
+        this.length = length;
+    }
 }
