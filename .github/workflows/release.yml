@@ -25,26 +25,32 @@ jobs:
       - run: sudo apt install -y unzip
       - name: linux-arm64
         run : |
+          mkdir -p runtimes/linux-arm64/native
           curl -LO "https://github.com/IgnaciodelaTorreArias/tokenizers_proto/releases/download/v${{ inputs.tokenizers_proto_version }}/linux-arm64.zip"
           unzip "linux-arm64.zip" -d runtimes/linux-arm64/native
       - name: linux-x64
         run : |
+          mkdir -p runtimes/linux-x64/native
           curl -LO "https://github.com/IgnaciodelaTorreArias/tokenizers_proto/releases/download/v${{ inputs.tokenizers_proto_version }}/linux-x64.zip"
           unzip "linux-x64.zip" -d runtimes/linux-x64/native
       - name: osx-arm64
         run : |
+          mkdir -p runtimes/osx-arm64/native
           curl -LO "https://github.com/IgnaciodelaTorreArias/tokenizers_proto/releases/download/v${{ inputs.tokenizers_proto_version }}/darwin-arm64.zip"
           unzip "darwin-arm64.zip" -d runtimes/osx-arm64/native
       - name: osx-x64
         run : |
+          mkdir -p runtimes/osx-x64/native
           curl -LO "https://github.com/IgnaciodelaTorreArias/tokenizers_proto/releases/download/v${{ inputs.tokenizers_proto_version }}/darwin-x64.zip"
           unzip "darwin-x64.zip" -d runtimes/osx-x64/native
       - name: win-arm64
         run : |
+          mkdir -p runtimes/win-arm64/native
           curl -LO "https://github.com/IgnaciodelaTorreArias/tokenizers_proto/releases/download/v${{ inputs.tokenizers_proto_version }}/windows-arm64.zip"
           unzip "windows-arm64.zip" -d runtimes/win-arm64/native
       - name: win-x64
         run : |
+          mkdir -p runtimes/win-x64/native
           curl -LO "https://github.com/IgnaciodelaTorreArias/tokenizers_proto/releases/download/v${{ inputs.tokenizers_proto_version }}/windows-x64.zip"
           unzip "windows-x64.zip" -d runtimes/win-x64/native
       # Finish downloads
