@@ -30,7 +30,7 @@ jobs:
           read -a rust_runtimes <<< "${{ env.RUST_RUNTIMES }}"
           for ((i=0;i<${#net_runtimes[@]};i++)); do 
             mkdir -p ./runtimes/${net_runtimes[i]}/native
-            curl -L "https://github.com/IgnaciodelaTorreArias/tokenizers_proto/releases/download/v${{ inputs.tokenizers_proto_version }}/${rust_runtimes[i]}.tar.gz |
+            curl -L "https://github.com/IgnaciodelaTorreArias/tokenizers_proto/releases/download/v${{ inputs.tokenizers_proto_version }}/${rust_runtimes[i]}.tar.gz" |
             tar -xzf - -C ./runtimes/${net_runtimes[i]}/native
           ; done
       - name: run dotnet pack
