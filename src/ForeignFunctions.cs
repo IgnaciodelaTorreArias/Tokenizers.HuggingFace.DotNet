@@ -2,89 +2,33 @@
 
 using Google.Protobuf;
 
-using Messages;
+using Tokenizers.HuggingFace.Errors;
+using Tokenizers.HuggingFace.Internal.Errors;
 
-namespace Tokenizers.HuggingFace;
-
-internal sealed class InvalidProtocolBufferException : IOException { }
-
-internal sealed class NormalizationException : Exception
-{
-    internal NormalizationException(string details) : base(details) { }
-}
-internal sealed class PreTokenizationException : Exception
-{
-    internal PreTokenizationException(string details) : base(details) { }
-}
-internal sealed class TokenizerBuildException : Exception
-{
-    internal TokenizerBuildException(string details) : base(details) { }
-}
-internal sealed class TokenizerTrainingException : Exception
-{
-    internal TokenizerTrainingException(string details) : base(details) { }
-}
-internal sealed class TokenizerSaveException : Exception
-{
-    internal TokenizerSaveException(string details) : base(details) { }
-}
-internal sealed class TokenizerLoadFileException : Exception
-{
-    internal TokenizerLoadFileException(string details) : base(details) { }
-}
-internal sealed class TokenizerEncodingException : Exception
-{
-    internal TokenizerEncodingException(string details) : base(details) { }
-}
-internal sealed class TokenizerDecodingException : Exception
-{
-    internal TokenizerDecodingException(string details) : base(details) { }
-}
+namespace Tokenizers.HuggingFace.Internal;
 
 internal static partial class ForeignFunctions
 {
     [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
     static extern void free_buffer(nuint ptr, nuint len);
-    /// <summary>
-    /// Filters foreign function errors and throws the corresponding C# exception.
-    /// </summary>
-    /// <param name="status"></param>
-    /// <param name="buf"></param>
-    /// <param name="ptr"></param>
-    /// <param name="len"></param>
-    /// <exception cref="InvalidProtocolBufferException"></exception>
-    /// <exception cref="ArgumentException"></exception>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
-    /// <exception cref="ArgumentNullException"></exception>
-    /// <exception cref="NormalizationException"></exception>
-    /// <exception cref="PreTokenizationException"></exception>
-    /// <exception cref="TokenizerBuildException"></exception>
-    /// <exception cref="TokenizerTrainingException"></exception>
-    /// <exception cref="TokenizerSaveException"></exception>
-    /// <exception cref="TokenizerLoadFileException"></exception>
-    /// <exception cref="TokenizerEncodingException"></exception>
-    /// <exception cref="TokenizerDecodingException"></exception>
-    /// <exception cref="Exception"></exception>
+
     static void ThrowErrors(Int32 status, Span<byte> buf, nuint ptr, nuint len)
     {
-        var call_status = (CallStatus)status;
+        var callStatus = (CallStatus)status;
         var details = "";
         if (status > 0)
         {
-            Error err = new Error();
-            if (len > 0)
-            {
-                err = Error.Parser.ParseFrom(buf);
-                free_buffer(ptr, len);
-            }
+            Error err = new();
+            err = Error.Parser.ParseFrom(buf);
+            free_buffer(ptr, len);
             details = err.Details;
         }
-        switch (call_status)
+        switch (callStatus)
         {
             case CallStatus.Ok:
                 return;
             case CallStatus.DecodeError:
-                throw new InvalidProtocolBufferException();
+                throw new InvalidBufferException();
             case CallStatus.InvalidArgumentsDetails:
                 throw new ArgumentException(details);
             case CallStatus.InvalidArguments:
@@ -93,6 +37,8 @@ internal static partial class ForeignFunctions
                 throw new ArgumentOutOfRangeException("Not a valid Enum Value");
             case CallStatus.EmptyParams:
                 throw new ArgumentNullException("A requiered field is not present");
+            case CallStatus.InvalidPointerDetails:
+                throw new InvalidPointerException(details);
             case CallStatus.NormalizationErrorDetails:
                 throw new NormalizationException(details);
             case CallStatus.PreTokenizationErrorDetails:
@@ -116,8 +62,8 @@ internal static partial class ForeignFunctions
             throw new Exception($"Unknown error occurred, code: {status}");
     }
 
-    public delegate Int32 _CreateNewArgsResultDelegate(out nuint instance_ptr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
-    public static nuint CreateNewArgsResult<I>(_CreateNewArgsResultDelegate func, I request)
+    internal delegate Int32 _CreateNewArgsResultDelegate(out nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
+    internal static nuint CreateNewArgsResult<I>(_CreateNewArgsResultDelegate func, I request)
         where I : IMessage<I>
     {
         byte[] buf = request.ToByteArray();
@@ -126,7 +72,7 @@ internal static partial class ForeignFunctions
             fixed (byte* ptr = buf)
             {
                 Int32 result = func(
-                    out nuint instance_ptr,
+                    out nuint instancePtr,
                     (nuint)ptr,
                     (nuint)buf.Length,
                     out nuint outPtr,
@@ -135,13 +81,13 @@ internal static partial class ForeignFunctions
                 Span<byte> span = new((void*)outPtr, (int)outLen);
                 ThrowErrors(result, span, outPtr, outLen);
                 // We don't free the outPtr here, because it's only used to pass error details, managed by ThrowErrors
-                return instance_ptr;
+                return instancePtr;
             }
         }
     }
 
-    public delegate Int32 _MethodFuncArgsResultDelegate(nuint instance_ptr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
-    public static R MethodArgsResult<R, I>(_MethodFuncArgsResultDelegate func, nuint instance_ptr, I request, MessageParser<R> Parser)
+    internal delegate Int32 _MethodFuncArgsResultDelegate(nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
+    internal static R MethodArgsResult<R, I>(_MethodFuncArgsResultDelegate func, nuint instancePtr, I request, MessageParser<R> parser)
         where I : IMessage<I>
         where R : IMessage<R>
     {
@@ -151,7 +97,7 @@ internal static partial class ForeignFunctions
             fixed (byte* ptr = buf)
             {
                 Int32 result = func(
-                    instance_ptr,
+                    instancePtr,
                     (nuint)ptr,
                     (nuint)buf.Length,
                     out nuint outPtr,
@@ -159,23 +105,56 @@ internal static partial class ForeignFunctions
                 );
                 Span<byte> span = new((void*)outPtr, (int)outLen);
                 ThrowErrors(result, span, outPtr, outLen);
-                var res = Parser.ParseFrom(span);
+                var res = parser.ParseFrom(span);
                 free_buffer(outPtr, outLen);
                 return res;
             }
         }
     }
+    internal static void MethodArgsResult<I>(_MethodFuncArgsResultDelegate func, nuint instancePtr, I request)
+        where I : IMessage<I>
+    {
+        byte[] buf = request.ToByteArray();
+        unsafe
+        {
+            fixed (byte* ptr = buf)
+            {
+                Int32 result = func(
+                    instancePtr,
+                    (nuint)ptr,
+                    (nuint)buf.Length,
+                    out nuint outPtr,
+                    out nuint outLen
+                );
+                Span<byte> span = new((void*)outPtr, (int)outLen);
+                ThrowErrors(result, span, outPtr, outLen);
+                // We don't free the outPtr here, because it's only used to pass error details, managed by ThrowErrors
+            }
+        }
+    }
 }
-
+/// <summary>
+/// The base class for "managed instances". Which internally are managed by our rust dynamic library.
+/// Current managed instances are:
+/// <list type="bullet">
+/// <item><see cref="HuggingFace.Normalizers.Normalizer"/></item>
+/// <item><see cref="HuggingFace.PreTokenizers.PreTokenizer"/></item>
+/// <item><see cref="HuggingFace.PipelineString.PipelineString"/></item>
+/// <item><see cref="HuggingFace.Tokenizer.Tokenizer"/></item>
+/// </list>
+/// </summary>
 public abstract class ForeignInstance
 {
     internal nuint InstancePtr;
-    internal delegate void FreeDelegate(nuint instance_ptr);
+    internal delegate void FreeDelegate(nuint instancePtr);
     internal abstract FreeDelegate FreeFunc();
     internal ForeignInstance()
     {
         InstancePtr = 0;
     }
+    /// <summary>
+    /// Every managed instance must implement <see cref="FreeFunc"/> this destructure uses the callback function to free the instance internally.
+    /// </summary>
     ~ForeignInstance()
     {
         FreeFunc()(InstancePtr);

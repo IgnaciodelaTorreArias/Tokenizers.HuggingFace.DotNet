@@ -14,6 +14,7 @@
     <PackageProjectUrl>https://github.com/IgnaciodelaTorreArias/Tokenizers.HuggingFace.DotNet</PackageProjectUrl>
     <RepositoryUrl>https://github.com/IgnaciodelaTorreArias/Tokenizers.HuggingFace.DotNet</RepositoryUrl>
     <PackageTags>tokenizer;huggingface;bindings;</PackageTags>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,16 +28,22 @@
   <ItemGroup>
     <Protobuf Include="tokenizers_proto\protos\error.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
     <Protobuf Include="tokenizers_proto\protos\tokenizer.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
+    <Protobuf Include="tokenizers_proto\protos\tokenizer_public.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
     <Protobuf Include="tokenizers_proto\protos\utils.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
+    <!--Pipeline String-->
+      <Protobuf Include="tokenizers_proto\protos\pipeline_string\pipeline_string.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
+      <Protobuf Include="tokenizers_proto\protos\pipeline_string\pipeline_string_public.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
     <!--Normalizers-->
       <Protobuf Include="tokenizers_proto\protos\normalizers\bert.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
       <Protobuf Include="tokenizers_proto\protos\normalizers\byte_level.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
       <Protobuf Include="tokenizers_proto\protos\normalizers\normalizer.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
       <Protobuf Include="tokenizers_proto\protos\normalizers\normalizer_instance.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
       <Protobuf Include="tokenizers_proto\protos\normalizers\precompiled.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
+      <Protobuf Include="tokenizers_proto\protos\normalizers\replace.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
       <Protobuf Include="tokenizers_proto\protos\normalizers\unicode.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
       <Protobuf Include="tokenizers_proto\protos\normalizers\utils.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
     <!--Pre Tokenizers-->
+      <Protobuf Include="tokenizers_proto\protos\pre_tokenizers\split_delimiter_behavior.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
       <Protobuf Include="tokenizers_proto\protos\pre_tokenizers\bert.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
       <Protobuf Include="tokenizers_proto\protos\pre_tokenizers\byte_level.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
       <Protobuf Include="tokenizers_proto\protos\pre_tokenizers\metaspace.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
@@ -47,6 +54,7 @@
     <!--Processors-->
       <Protobuf Include="tokenizers_proto\protos\processors\bert.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
       <Protobuf Include="tokenizers_proto\protos\processors\processor.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
+      <Protobuf Include="tokenizers_proto\protos\processors\processor_public.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
       <Protobuf Include="tokenizers_proto\protos\processors\roberta.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
       <Protobuf Include="tokenizers_proto\protos\processors\template.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
     <!--Decoders-->
@@ -54,13 +62,16 @@
       <Protobuf Include="tokenizers_proto\protos\decoders\byte_fallback.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
       <Protobuf Include="tokenizers_proto\protos\decoders\ctc.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
       <Protobuf Include="tokenizers_proto\protos\decoders\decoder.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
+      <Protobuf Include="tokenizers_proto\protos\decoders\decoder_public.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
       <Protobuf Include="tokenizers_proto\protos\decoders\fuse.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
       <Protobuf Include="tokenizers_proto\protos\decoders\strip.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
       <Protobuf Include="tokenizers_proto\protos\decoders\word_piece.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
     <!--Trainers-->
+      <Protobuf Include="tokenizers_proto\protos\trainers\added_token.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
       <Protobuf Include="tokenizers_proto\protos\trainers\bpe.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
       <Protobuf Include="tokenizers_proto\protos\trainers\padding_params.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
       <Protobuf Include="tokenizers_proto\protos\trainers\trainer.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
+      <Protobuf Include="tokenizers_proto\protos\trainers\trainer_public.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
       <Protobuf Include="tokenizers_proto\protos\trainers\truncation_params.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
       <Protobuf Include="tokenizers_proto\protos\trainers\unigram.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />
       <Protobuf Include="tokenizers_proto\protos\trainers\word_level.proto" GrpcServices="None" AdditionalImportDirs="tokenizers_proto\protos" />

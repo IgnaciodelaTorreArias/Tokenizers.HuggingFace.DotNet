@@ -12,6 +12,9 @@ permissions:
 jobs:
   pack:
     runs-on: ubuntu-latest
+    env:
+      NET_RUNTIMES: "linux-arm64 linux-x64 osx-arm64 osx-x64 win-arm64 win-x64"
+      RUST_RUNTIMES: "linux-arm64 linux-x64 darwin-arm64 darwin-x64 window-arm64 windows-x64"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -21,39 +24,15 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '6.0.428'
-      # Start downloads
-      - run: sudo apt install -y unzip
-      - name: linux-arm64
-        run : |
-          mkdir -p runtimes/linux-arm64/native
-          curl -LO "https://github.com/IgnaciodelaTorreArias/tokenizers_proto/releases/download/v${{ inputs.tokenizers_proto_version }}/linux-arm64.zip"
-          unzip "linux-arm64.zip" -d runtimes/linux-arm64/native
-      - name: linux-x64
-        run : |
-          mkdir -p runtimes/linux-x64/native
-          curl -LO "https://github.com/IgnaciodelaTorreArias/tokenizers_proto/releases/download/v${{ inputs.tokenizers_proto_version }}/linux-x64.zip"
-          unzip "linux-x64.zip" -d runtimes/linux-x64/native
-      - name: osx-arm64
-        run : |
-          mkdir -p runtimes/osx-arm64/native
-          curl -LO "https://github.com/IgnaciodelaTorreArias/tokenizers_proto/releases/download/v${{ inputs.tokenizers_proto_version }}/darwin-arm64.zip"
-          unzip "darwin-arm64.zip" -d runtimes/osx-arm64/native
-      - name: osx-x64
-        run : |
-          mkdir -p runtimes/osx-x64/native
-          curl -LO "https://github.com/IgnaciodelaTorreArias/tokenizers_proto/releases/download/v${{ inputs.tokenizers_proto_version }}/darwin-x64.zip"
-          unzip "darwin-x64.zip" -d runtimes/osx-x64/native
-      - name: win-arm64
-        run : |
-          mkdir -p runtimes/win-arm64/native
-          curl -LO "https://github.com/IgnaciodelaTorreArias/tokenizers_proto/releases/download/v${{ inputs.tokenizers_proto_version }}/windows-arm64.zip"
-          unzip "windows-arm64.zip" -d runtimes/win-arm64/native
-      - name: win-x64
-        run : |
-          mkdir -p runtimes/win-x64/native
-          curl -LO "https://github.com/IgnaciodelaTorreArias/tokenizers_proto/releases/download/v${{ inputs.tokenizers_proto_version }}/windows-x64.zip"
-          unzip "windows-x64.zip" -d runtimes/win-x64/native
-      # Finish downloads
+      - name: download libraries
+        run: |
+          read -a net_runtimes <<< "${{ env.NET_RUNTIMES }}"
+          read -a rust_runtimes <<< "${{ env.RUST_RUNTIMES }}"
+          for ((i=0;i<${#net_runtimes[@]};i++)); do 
+            mkdir -p ./runtimes/${net_runtimes[i]}/native
+            curl -L "https://github.com/IgnaciodelaTorreArias/tokenizers_proto/releases/download/v${{ inputs.tokenizers_proto_version }}/${rust_runtimes[i]}.tar.gz |
+            tar -xzf - -C ./runtimes/${net_runtimes[i]}/native
+          ; done
       - name: run dotnet pack
         run: dotnet pack Tokenizers.HuggingFace.csproj -c Release -p:PackageVersion=${{ inputs.version }}
       - name: publish to nuget
