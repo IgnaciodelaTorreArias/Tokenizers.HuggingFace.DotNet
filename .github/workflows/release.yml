@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NET_RUNTIMES: "linux-arm64 linux-x64 osx-arm64 osx-x64 win-arm64 win-x64"
-      RUST_RUNTIMES: "linux-arm64 linux-x64 darwin-arm64 darwin-x64 window-arm64 windows-x64"
+      RUST_RUNTIMES: "linux-arm64 linux-x64 darwin-arm64 darwin-x64 windows-arm64 windows-x64"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -28,11 +28,12 @@ jobs:
         run: |
           read -a net_runtimes <<< "${{ env.NET_RUNTIMES }}"
           read -a rust_runtimes <<< "${{ env.RUST_RUNTIMES }}"
-          for ((i=0;i<${#net_runtimes[@]};i++)); do 
+          for ((i=0;i<${#net_runtimes[@]};i++))
+          do
             mkdir -p ./runtimes/${net_runtimes[i]}/native
             curl -L "https://github.com/IgnaciodelaTorreArias/tokenizers_proto/releases/download/v${{ inputs.tokenizers_proto_version }}/${rust_runtimes[i]}.tar.gz" |
             tar -xzf - -C ./runtimes/${net_runtimes[i]}/native
-          ; done
+          done
       - name: run dotnet pack
         run: dotnet pack Tokenizers.HuggingFace.csproj -c Release -p:PackageVersion=${{ inputs.version }}
       - name: publish to nuget
