@@ -4,7 +4,8 @@ namespace Tokenizers.HuggingFace.Errors;
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 public sealed class InvalidBufferException : Exception { }
-public sealed class InvalidPointerException : Exception {
+public sealed class InvalidPointerException : Exception
+{
     internal InvalidPointerException(string details) : base(details) { }
 }
 public sealed class NormalizationException : Exception

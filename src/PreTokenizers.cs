@@ -1,9 +1,9 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-
+using Tokenizers.HuggingFace.Decoders;
 using Tokenizers.HuggingFace.Internal;
 using Tokenizers.HuggingFace.Internal.PreTokenizers;
-using Tokenizers.HuggingFace.Decoders;
+using Tokenizers.HuggingFace.Normalizers;
 
 namespace Tokenizers.HuggingFace.PreTokenizers;
 
@@ -24,7 +24,7 @@ internal static class PreTokenizersForeignFunctions
 /// </summary>
 public class PreTokenizer : ForeignInstance
 {
-    internal PreTokenizer(PreTokenizerWrapperParams param)
+    internal PreTokenizer(PreTokenizerWrapper param)
     {
         InstancePtr = ForeignFunctions.CreateNewArgsResult(
             PreTokenizersForeignFunctions.new_pre_tokenizer_wrapper,
@@ -42,6 +42,8 @@ public class PreTokenizer : ForeignInstance
     /// </remarks>
     public void PreTokenize(PipelineString.PipelineString pipelineString)
     {
+        if (InstancePtr == 0)
+            throw new ObjectDisposedException("PreTokenizer");
         ForeignFunctions.MethodArgsResult<PreTokenizeParams>(
             PreTokenizersForeignFunctions.pre_tokenize,
             InstancePtr,
@@ -57,7 +59,7 @@ public class PreTokenizer : ForeignInstance
 public class Bert : PreTokenizer
 {
     /// <inheritdoc cref="Bert"/>
-    public Bert() : base(new PreTokenizerWrapperParams { BertPreTokenizer = { } }) { }
+    public Bert() : base(new PreTokenizerWrapper { BertPreTokenizer = new() { } }) { }
 }
 /// <summary>
 /// Provides all the necessary steps to handle the BPE tokenization at the byte-level.<br/>
@@ -82,9 +84,9 @@ public class ByteLevel : PreTokenizer
     /// <param name="trimOffsets">Initializer for: <see cref="TrimOffsets"/></param>
     /// <param name="useRegex">Initializer for: <see cref="UseRegex"/></param>
     public ByteLevel(bool addPrefixSpace = true, bool trimOffsets = true, bool useRegex = true) :
-        base(new PreTokenizerWrapperParams
+        base(new PreTokenizerWrapper
         {
-            ByteLevel =
+            ByteLevel = new()
             {
                 AddPrefixSpace = addPrefixSpace,
                 TrimOffsets = trimOffsets,
@@ -117,9 +119,9 @@ public class Metaspace : PreTokenizer
     /// <param name="prependScheme">Initializer for: <see cref="PrependScheme"/></param>
     /// <param name="split">Initializer for: <see cref="Split"/></param>
     public Metaspace(char replacementChar, PrependScheme prependScheme, bool split) :
-        base(new PreTokenizerWrapperParams
+        base(new PreTokenizerWrapper
         {
-            Metaspace =
+            Metaspace = new()
             {
                 ReplacementChar = replacementChar.ToString(),
                 PrependScheme = prependScheme,
@@ -139,7 +141,7 @@ public class Whitespace : PreTokenizer
 {
     /// <inheritdoc cref="Whitespace"/>
     public Whitespace() :
-        base(new PreTokenizerWrapperParams { Whitespace = { } })
+        base(new PreTokenizerWrapper { Whitespace = new() { } })
     { }
 }
 /// <summary>
@@ -149,7 +151,7 @@ public class WhitespaceSplit : PreTokenizer
 {
     /// <inheritdoc cref="WhitespaceSplit"/>
     public WhitespaceSplit() :
-        base(new PreTokenizerWrapperParams { WhitespaceSplit = { } })
+        base(new PreTokenizerWrapper { WhitespaceSplit = new() { } })
     { }
 }
 /// <summary>
@@ -164,9 +166,9 @@ public class Delimiter : PreTokenizer
     /// <inheritdoc cref="Delimiter"/>
     /// <param name="delimiterChar">Initializer for: <see cref="DelimiterChar"/></param>
     public Delimiter(char delimiterChar) :
-        base(new PreTokenizerWrapperParams
+        base(new PreTokenizerWrapper
         {
-            Delimiter =
+            Delimiter = new()
             {
                 Char = delimiterChar.ToString()
             }
@@ -184,18 +186,21 @@ public class Squence : PreTokenizer
     /// The pre-tokenizers that will be run in sequence
     /// </summary>
     public readonly IEnumerable<PreTokenizer> PreTokenizers;
-    /// <inheritdoc cref="Sequence"/>
+    /// <inheritdoc cref="Tokenizers.HuggingFace.PreTokenizers.Squence"/>
     /// <param name="preTokenizers">A collection of <see cref="PreTokenizer"/> instances to initialize <see cref="PreTokenizers"/>.</param>
     public Squence(IEnumerable<PreTokenizer> preTokenizers) :
-        base(new PreTokenizerWrapperParams
+        base(new PreTokenizerWrapper
         {
-            Sequence =
-            {
-                Addresses = { preTokenizers.Select(static n => (ulong)n.InstancePtr) }
-            }
+            Sequence = ForeignFunctions.ToSequence(preTokenizers)
         })
     {
         this.PreTokenizers = preTokenizers;
+    }
+    internal override void Dispose(bool disposing)
+    {
+        foreach (var pt in PreTokenizers)
+            pt.Dispose();
+        base.Dispose(disposing);
     }
 }
 /// <summary>
@@ -222,9 +227,9 @@ public class Split : PreTokenizer
     /// <param name="behavior">Initializer for: <see cref="Behavior"/></param>
     /// <param name="invert">Initializer for: <see cref="Invert"/></param>
     public Split(string pattern, SplitDelimiterBehavior behavior, bool invert) :
-        base(new PreTokenizerWrapperParams
+        base(new PreTokenizerWrapper
         {
-            Split =
+            Split = new()
             {
                 StringSplit = pattern,
                 Behavior = behavior,
@@ -243,9 +248,9 @@ public class Split : PreTokenizer
     /// <param name="behavior">Initializer for: <see cref="Behavior"/></param>
     /// <param name="invert">Initializer for: <see cref="Invert"/></param>
     public Split(Regex pattern, SplitDelimiterBehavior behavior, bool invert) :
-        base(new PreTokenizerWrapperParams
+        base(new PreTokenizerWrapper
         {
-            Split =
+            Split = new()
             {
                 RegexSplit = pattern.ToString(),
                 Behavior = behavior,
@@ -268,9 +273,9 @@ public class Punctuation : PreTokenizer
     /// <inheritdoc cref="Punctuation"/>
     /// <param name="behavior">Initializer for: <see cref="Behavior"/></param>
     public Punctuation(SplitDelimiterBehavior behavior = SplitDelimiterBehavior.Isolated) :
-        base(new PreTokenizerWrapperParams
+        base(new PreTokenizerWrapper
         {
-            Punctuation =
+            Punctuation = new()
             {
                 Behavior = behavior
             }
@@ -291,9 +296,9 @@ public class Digits : PreTokenizer
     /// <inheritdoc cref="Digits"/>
     /// <param name="individualDigits">Initializer for: <see cref="IndividualDigits"/></param>
     public Digits(bool individualDigits) :
-        base(new PreTokenizerWrapperParams
+        base(new PreTokenizerWrapper
         {
-            Digits =
+            Digits = new()
             {
                 IndividualDigits = individualDigits
             }
@@ -310,7 +315,7 @@ public class Digits : PreTokenizer
 public class UnicodeScripts : PreTokenizer
 {
     /// <inheritdoc cref="UnicodeScripts"/>
-    public UnicodeScripts() : base(new PreTokenizerWrapperParams { UnicodeScripts = { } }) { }
+    public UnicodeScripts() : base(new PreTokenizerWrapper { UnicodeScripts = new() { } }) { }
 }
 /// <summary>
 /// Creates fixed length splits
@@ -324,9 +329,9 @@ public class FixedLength : PreTokenizer
     /// <inheritdoc cref="FixedLength"/>
     /// <param name="length">Initializer for: <see cref="Length"/></param>
     public FixedLength(UInt64 length = 5) :
-        base(new PreTokenizerWrapperParams
+        base(new PreTokenizerWrapper
         {
-            FixedLength =
+            FixedLength = new()
             {
                 Length = length
             }

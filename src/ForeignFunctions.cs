@@ -36,7 +36,7 @@ internal static partial class ForeignFunctions
             case CallStatus.UnknownEnumValue:
                 throw new ArgumentOutOfRangeException("Not a valid Enum Value");
             case CallStatus.EmptyParams:
-                throw new ArgumentNullException("A requiered field is not present");
+                throw new ArgumentNullException("A required field is not present");
             case CallStatus.InvalidPointerDetails:
                 throw new InvalidPointerException(details);
             case CallStatus.NormalizationErrorDetails:
@@ -132,6 +132,12 @@ internal static partial class ForeignFunctions
             }
         }
     }
+    internal static Sequence ToSequence(IEnumerable<ForeignInstance> instances)
+    {
+        var seq = new Sequence();
+        seq.Addresses.AddRange(instances.Select(i => (ulong)i.InstancePtr));
+        return seq;
+    }
 }
 /// <summary>
 /// The base class for "managed instances". Which internally are managed by our rust dynamic library.
@@ -143,7 +149,7 @@ internal static partial class ForeignFunctions
 /// <item><see cref="HuggingFace.Tokenizer.Tokenizer"/></item>
 /// </list>
 /// </summary>
-public abstract class ForeignInstance
+public abstract class ForeignInstance : IDisposable
 {
     internal nuint InstancePtr;
     internal delegate void FreeDelegate(nuint instancePtr);
@@ -152,11 +158,27 @@ public abstract class ForeignInstance
     {
         InstancePtr = 0;
     }
+    internal virtual void Dispose(bool disposing)
+    {
+        if (InstancePtr == 0)
+            return;
+        FreeFunc()(InstancePtr);
+        InstancePtr = 0;
+    }
+    /// <summary>
+    /// Disposes the managed instance, calling the internal <see cref="FreeFunc"/> to free the instance internally.
+    /// </summary>
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
     /// <summary>
     /// Every managed instance must implement <see cref="FreeFunc"/> this destructure uses the callback function to free the instance internally.
     /// </summary>
     ~ForeignInstance()
     {
-        FreeFunc()(InstancePtr);
+        Dispose(false);
     }
 }

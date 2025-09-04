@@ -26,7 +26,7 @@ internal static class NormalizersForeignFunctions
 /// </summary>
 abstract public class Normalizer : ForeignInstance
 {
-    internal Normalizer(NormalizerWrapperParams param)
+    internal Normalizer(NormalizerWrapper param)
     {
         InstancePtr = ForeignFunctions.CreateNewArgsResult(
             NormalizersForeignFunctions.new_normalizer_wrapper,
@@ -44,6 +44,8 @@ abstract public class Normalizer : ForeignInstance
     /// </remarks>
     public void Normalize(PipelineString.PipelineString pipelineString)
     {
+        if (InstancePtr == 0)
+            throw new ObjectDisposedException("Normalizer");
         ForeignFunctions.MethodArgsResult<NormalizeParams>(
             NormalizersForeignFunctions.normalize,
             InstancePtr,
@@ -87,9 +89,9 @@ public class Bert : Normalizer
     /// <param name="stripAccents">Initializer for: <see cref="StripAccents"/></param>
     /// <param name="lowercase">Initializer for: <see cref="Lowercase"/></param>
     public Bert(bool cleanText = true, bool handleChineseChars = true, bool stripAccents = true, bool lowercase = true) :
-        base(new NormalizerWrapperParams
+        base(new NormalizerWrapper
         {
-            BertNormalizer =
+            BertNormalizer = new()
             {
                 CleanText = cleanText,
                 HandleChineseChars = handleChineseChars,
@@ -110,7 +112,7 @@ public class Bert : Normalizer
 public class Nfd : Normalizer
 {
     /// <inheritdoc cref="Nfd"/>
-    public Nfd() : base(new NormalizerWrapperParams { Nfd = { } }) { }
+    public Nfd() : base(new NormalizerWrapper { Nfd = new() { } }) { }
 }
 /// <summary>
 /// NFKD unicode normalizer
@@ -118,7 +120,7 @@ public class Nfd : Normalizer
 public class Nfkd : Normalizer
 {
     /// <inheritdoc cref="Nfkd"/>
-    public Nfkd() : base(new NormalizerWrapperParams { Nfkd = { } }) { }
+    public Nfkd() : base(new NormalizerWrapper { Nfkd = new() { } }) { }
 }
 /// <summary>
 /// NFC unicode normalizer
@@ -126,7 +128,7 @@ public class Nfkd : Normalizer
 public class Nfc : Normalizer
 {
     /// <inheritdoc cref="Nfc"/>
-    public Nfc() : base(new NormalizerWrapperParams { Nfc = { } }) { }
+    public Nfc() : base(new NormalizerWrapper { Nfc = new() { } }) { }
 }
 /// <summary>
 /// NFKC unicode normalizer
@@ -134,7 +136,7 @@ public class Nfc : Normalizer
 public class Nfkc : Normalizer
 {
     /// <inheritdoc cref="Nfkc"/>
-    public Nfkc() : base(new NormalizerWrapperParams { Nfkc = { } }) { }
+    public Nfkc() : base(new NormalizerWrapper { Nfkc = new() { } }) { }
 }
 /// <summary>
 /// NMT unicode normalizer
@@ -142,7 +144,7 @@ public class Nfkc : Normalizer
 public class Nmt : Normalizer
 {
     /// <inheritdoc cref="Nmt"/>
-    public Nmt() : base(new NormalizerWrapperParams { Nmt = { } }) { }
+    public Nmt() : base(new NormalizerWrapper { Nmt = new() { } }) { }
 }
 /// <summary>
 /// Strip whitespaces from the left and/or right of the string.<br/>
@@ -163,9 +165,9 @@ public class StripNormalizer : Normalizer
     /// <param name="stripLeft">Initializer for: <see cref="StripLeft"/></param>
     /// <param name="stripRight">Initializer for: <see cref="StripRight"/></param>
     public StripNormalizer(bool stripLeft, bool stripRight) :
-        base(new NormalizerWrapperParams
+        base(new NormalizerWrapper
         {
-            StripNormalizer =
+            StripNormalizer = new()
             {
                 StripLeft = stripLeft,
                 StripRight = stripRight
@@ -183,7 +185,7 @@ public class StripNormalizer : Normalizer
 public class StripAccents : Normalizer
 {
     /// <inheritdoc cref="StripAccents"/>
-    public StripAccents() : base(new NormalizerWrapperParams { StripAccents = { } }) { }
+    public StripAccents() : base(new NormalizerWrapper { StripAccents = new() { } }) { }
 }
 /// <summary>
 /// Allows concatenating multiple other <see cref="Normalizer"/> as a Sequence. All the normalizers are run in sequence in the given order
@@ -197,14 +199,18 @@ public class Sequence : Normalizer
     /// <inheritdoc cref="Sequence"/>
     /// <param name="normalizers">A collection of <see cref="Normalizer"/> instances to initialize <see cref="Normalizers"/>.</param>
     public Sequence(IEnumerable<Normalizer> normalizers) :
-        base(new NormalizerWrapperParams
+        base(new NormalizerWrapper
         {
-            Sequence = {
-                Addresses = { normalizers.Select(static n => (ulong)n.InstancePtr) }
-            }
+            Sequence = ForeignFunctions.ToSequence(normalizers)
         })
     {
         this.Normalizers = normalizers;
+    }
+    internal override void Dispose(bool disposing)
+    {
+        foreach (var n in Normalizers)
+            n.Dispose();
+        base.Dispose(disposing);
     }
 }
 /// <summary>
@@ -213,7 +219,7 @@ public class Sequence : Normalizer
 public class Lowercase : Normalizer
 {
     /// <inheritdoc cref="Lowercase"/>
-    public Lowercase() : base(new NormalizerWrapperParams { Lowercase = { } }) { }
+    public Lowercase() : base(new NormalizerWrapper { Lowercase = new() { } }) { }
 }
 /// <summary>
 /// Prepends a string to the <see cref="PipelineString.PipelineString"/> we want to normalize
@@ -227,9 +233,9 @@ public class Prepend : Normalizer
     /// <inheritdoc cref="Prepend"/>
     /// <param name="prepended">Initializar for: <see cref="Prepended"/></param>
     public Prepend(string prepended) :
-        base(new NormalizerWrapperParams
+        base(new NormalizerWrapper
         {
-            Prepend = { Prepend_ = prepended }
+            Prepend = new() { Prepend_ = prepended }
         })
     {
         this.Prepended = prepended;
@@ -255,9 +261,9 @@ public class Replace : Normalizer
     /// <param name="pattern">Initializer for: <see cref="Pattern"/></param>
     /// <param name="content">Initializer for: <see cref="Content"/></param>
     public Replace(string pattern, string content) :
-        base(new NormalizerWrapperParams
+        base(new NormalizerWrapper
         {
-            Replace =
+            Replace = new()
             {
                 StringReplacement = pattern,
                 Content = content
@@ -273,9 +279,9 @@ public class Replace : Normalizer
     /// <param name="pattern">Initializer for: <see cref="Pattern"/></param>
     /// <param name="content">Initializer for: <see cref="Content"/></param>
     public Replace(Regex pattern, string content) :
-        base(new NormalizerWrapperParams
+        base(new NormalizerWrapper
         {
-            Replace =
+            Replace = new()
             {
                 RegexReplacement = pattern.ToString(),
                 Content = content
@@ -297,9 +303,9 @@ public class Precompiled : Normalizer
     public readonly byte[] PrecompiledCharsmap;
     public Precompiled(byte[] precompiledCharsmap) :
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
-        base(new NormalizerWrapperParams
+        base(new NormalizerWrapper
         {
-            Precompiled = { PrecompiledCharsmap = ByteString.CopyFrom(precompiledCharsmap) }
+            Precompiled = new() { PrecompiledCharsmap = ByteString.CopyFrom(precompiledCharsmap) }
         })
     {
         this.PrecompiledCharsmap = precompiledCharsmap;
@@ -309,6 +315,6 @@ public class Precompiled : Normalizer
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 public class ByteLevel : Normalizer
 {
-    public ByteLevel() : base(new NormalizerWrapperParams { ByteLevel = { } }) { }
+    public ByteLevel() : base(new NormalizerWrapper { ByteLevel = new() { } }) { }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }

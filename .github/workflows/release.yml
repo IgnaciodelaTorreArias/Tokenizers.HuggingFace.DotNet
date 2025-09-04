@@ -13,8 +13,8 @@ jobs:
   pack:
     runs-on: ubuntu-latest
     env:
-      NET_RUNTIMES: "linux-arm64 linux-x64 osx-arm64 osx-x64 win-arm64 win-x64"
-      RUST_RUNTIMES: "linux-arm64 linux-x64 darwin-arm64 darwin-x64 windows-arm64 windows-x64"
+      NET_RUNTIMES: "linux-musl-arm64 linux-musl-x64 linux-arm64 linux-x64 osx-arm64 osx-x64 win-arm64 win-x64"
+      RUST_RUNTIMES: "aarch64-linux-musl x86_64-linux-musl aarch64-linux-gnu x86_64-linux-gnu aarch64-darwin x86_64-darwin aarch64-windows x86_64-windows"
     steps:
       - uses: actions/checkout@v4
         with:

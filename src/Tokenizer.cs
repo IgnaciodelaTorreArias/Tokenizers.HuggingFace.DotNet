@@ -46,6 +46,7 @@ public class Tokenizer : ForeignInstance
     /// </summary>
     /// <param name="files">A collection of paths to local files to use as training data</param>
     /// <param name="savePath">The path in which the JSON file should be saved</param>
+    /// <param name="model">Trained algorithm that defines how text is split into tokens</param>
     /// <param name="trainer">A trainer has the responsibility to train a model. We feed it with lines/sentences and then it can train the given Model</param>
     /// <param name="pretty">Whether the JSON file should be saved with a pretty more human readable format</param>
     /// <param name="normalizer">Takes care of pre-processing strings.</param>
@@ -63,30 +64,37 @@ public class Tokenizer : ForeignInstance
     /// It's possible for this method to throw other types of exceptions like (<see cref="Errors.InvalidBufferException"/>, <see cref="Errors.InvalidPointerException"/>, etc)<br/>
     /// This indicates an issue with the library, please open an issue at <see href="https://github.com/IgnaciodelaTorreArias/Tokenizers.HuggingFace.DotNet">GitHub</see>
     /// </remarks>
-    public static Tokenizer FromTrain(IEnumerable<string> files, string savePath, Trainers.Params trainer, bool pretty = false, Normalizer? normalizer = null, PreTokenizer? preTokenizer = null, IEnumerable<Processors.Params>? processors = null, IEnumerable<Decoders.Params>? decoders = null, Trainers.Truncation.TruncationParams? truncation = null, Trainers.Padding.PaddingParams? padding = null)
+    public static Tokenizer FromTrain(IEnumerable<string> files, string savePath, Models.ModelWrapper model, Trainers.TrainerWrapper trainer, bool pretty = false, Normalizer? normalizer = null, PreTokenizer? preTokenizer = null, IEnumerable<Processors.PostProcessorWrapper>? processors = null, IEnumerable<Decoders.DecoderWrapper>? decoders = null, Truncation.TruncationParams? truncation = null, Padding.PaddingParams? padding = null)
     {
-        var trainerParams = new Internal.Trainers.TrainerParams
+        var trainingParams = new Internal.Tokenizer.TokenizerFromTrain
         {
             Files = { files },
             SavePath = savePath,
             Pretty = pretty
         };
+        trainingParams.Model = model;
+        trainingParams.Trainer = trainer;
         if (normalizer != null)
-            trainerParams.Normalizer = normalizer.InstancePtr;
+            trainingParams.Normalizer = normalizer.InstancePtr;
         if (preTokenizer != null)
-            trainerParams.PreTokenizer = preTokenizer.InstancePtr;
+            trainingParams.PreTokenizer = preTokenizer.InstancePtr;
         if (processors != null)
-            trainerParams.Processor.Params.AddRange(processors);
+        {
+            trainingParams.Processor = new();
+            trainingParams.Processor.Params.AddRange(processors);
+        }
         if (decoders != null)
-            trainerParams.Decoder.Params.AddRange(decoders);
+        {
+            trainingParams.Decoder = new();
+            trainingParams.Decoder.Params.AddRange(decoders);
+        }
         if (truncation != null)
-            trainerParams.Truncation = truncation;
+            trainingParams.Truncation = truncation;
         if (padding != null)
-            trainerParams.Padding = padding;
-        trainerParams.Trainer = trainer;
+            trainingParams.Padding = padding;
         return new(ForeignFunctions.CreateNewArgsResult(
             TokenizerForeignFunctions.tokenizer_from_train,
-            trainerParams
+            trainingParams
         ));
     }
     /// <summary>
@@ -102,6 +110,8 @@ public class Tokenizer : ForeignInstance
     /// </remarks>
     public string Decode(IEnumerable<uint> ids, bool skipSpecialTokens)
     {
+        if (InstancePtr == 0)
+            throw new ObjectDisposedException("Tokenizer");
         return ForeignFunctions.MethodArgsResult<Internal.Tokenizer.DecodeResult, Internal.Tokenizer.DecodeParams>(
             TokenizerForeignFunctions.decode,
             InstancePtr,
@@ -150,6 +160,8 @@ public class Tokenizer : ForeignInstance
     /// </remarks>
     public IEnumerable<Encoding> Encode(string input, bool addSpecialTokens, string? input2 = null, bool includeTypeIds = false, bool includeTokens = false, bool includeWords = false, bool includeOffsets = false, bool includeSpecialTokensMask = false, bool includeAttentionMask = false, bool includeOverflowing = false)
     {
+        if (InstancePtr == 0)
+            throw new ObjectDisposedException("Tokenizer");
         var encodeParams = new Internal.Tokenizer.EncodeParams
         {
             Input = input,
