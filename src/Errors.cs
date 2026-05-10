@@ -1,6 +1,4 @@
-﻿using static System.Net.WebRequestMethods;
-
-namespace Tokenizers.HuggingFace.Errors;
+﻿namespace Tokenizers.HuggingFace.Errors;
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 public sealed class InvalidBufferException : Exception { }
@@ -39,5 +37,9 @@ public sealed class TokenizerEncodingException : Exception
 public sealed class TokenizerDecodingException : Exception
 {
     internal TokenizerDecodingException(string details) : base(details) { }
+}
+public sealed class TokenizerAddedVocabException : Exception
+{
+    internal TokenizerAddedVocabException(string details) : base(details) { }
 }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

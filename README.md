@@ -10,8 +10,6 @@ dotnet add package Tokenizers.HuggingFace
 
 ## Supported targets
 
-- linux-musl-arm64
-- linux-musl-x64
 - linux-arm64
 - linux-x64
 - osx-arm64

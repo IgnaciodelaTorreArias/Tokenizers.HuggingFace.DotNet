@@ -3,20 +3,19 @@ using System.Text.RegularExpressions;
 using Tokenizers.HuggingFace.Decoders;
 using Tokenizers.HuggingFace.Internal;
 using Tokenizers.HuggingFace.Internal.PreTokenizers;
-using Tokenizers.HuggingFace.Normalizers;
 
 namespace Tokenizers.HuggingFace.PreTokenizers;
 
 internal static class PreTokenizersForeignFunctions
 {
     [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern Int32 pre_tokenize(nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
+    public static extern Int32 lib_tokenizers_pre_tokenize(nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
 
     [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern Int32 new_pre_tokenizer_wrapper(out nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
+    public static extern Int32 lib_tokenizers_new_pre_tokenizer_wrapper(out nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
 
     [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void free_pre_tokenizer_wrapper(nuint instancePtr);
+    public static extern void lib_tokenizers_free_pre_tokenizer_wrapper(nuint instancePtr);
 }
 /// <summary>
 /// Represents a pre-tokenizer, which is used to split text into smaller pieces.<br/>
@@ -27,7 +26,7 @@ public class PreTokenizer : ForeignInstance
     internal PreTokenizer(PreTokenizerWrapper param)
     {
         InstancePtr = ForeignFunctions.CreateNewArgsResult(
-            PreTokenizersForeignFunctions.new_pre_tokenizer_wrapper,
+            PreTokenizersForeignFunctions.lib_tokenizers_new_pre_tokenizer_wrapper,
             param
         );
     }
@@ -45,13 +44,13 @@ public class PreTokenizer : ForeignInstance
         if (InstancePtr == 0)
             throw new ObjectDisposedException("PreTokenizer");
         ForeignFunctions.MethodArgsResult<PreTokenizeParams>(
-            PreTokenizersForeignFunctions.pre_tokenize,
+            PreTokenizersForeignFunctions.lib_tokenizers_pre_tokenize,
             InstancePtr,
             new PreTokenizeParams { PipelineString = pipelineString.InstancePtr }
         );
     }
     internal override FreeDelegate FreeFunc() =>
-        PreTokenizersForeignFunctions.free_pre_tokenizer_wrapper;
+        PreTokenizersForeignFunctions.lib_tokenizers_free_pre_tokenizer_wrapper;
 }
 /// <summary>
 /// Splits on whitespaces and punctuation

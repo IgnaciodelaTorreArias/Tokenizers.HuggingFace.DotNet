@@ -8,13 +8,13 @@ namespace Tokenizers.HuggingFace.PipelineString;
 internal static class PipelineStringForeignFunctions
 {
     [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern Int32 get_splits(nuint instance_ptr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
+    public static extern Int32 lib_tokenizers_get_splits(nuint instance_ptr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
 
     [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern Int32 new_pipeline_string(out nuint instance_ptr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
+    public static extern Int32 lib_tokenizers_new_pipeline_string(out nuint instance_ptr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
 
     [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void free_pipeline_string(nuint instance_ptr);
+    public static extern void lib_tokenizers_free_pipeline_string(nuint instance_ptr);
 }
 /// <summary>
 /// A string passed to represent transformations done by: <see cref="Normalizers.Normalizer.Normalize(PipelineString)"/> and <see cref="PreTokenizers.PreTokenizer.PreTokenize(PipelineString)"/>
@@ -26,7 +26,7 @@ public class PipelineString : ForeignInstance
     public PipelineString(string original)
     {
         InstancePtr = ForeignFunctions.CreateNewArgsResult(
-            PipelineStringForeignFunctions.new_pipeline_string,
+            PipelineStringForeignFunctions.lib_tokenizers_new_pipeline_string,
             new PipelineStringParams { Content = original }
         );
     }
@@ -46,7 +46,7 @@ public class PipelineString : ForeignInstance
     public IEnumerable<(string, (UInt64, UInt64)?)> GetSplits(OffsetReferential offsetReferential, OffsetType offsetType, bool includeOffsets)
     {
         var r = ForeignFunctions.MethodArgsResult(
-            PipelineStringForeignFunctions.get_splits,
+            PipelineStringForeignFunctions.lib_tokenizers_get_splits,
             this.InstancePtr,
             new SplitParams
             {
@@ -62,5 +62,5 @@ public class PipelineString : ForeignInstance
     }
 
     internal override FreeDelegate FreeFunc() =>
-        PipelineStringForeignFunctions.free_pipeline_string;
+        PipelineStringForeignFunctions.lib_tokenizers_free_pipeline_string;
 }

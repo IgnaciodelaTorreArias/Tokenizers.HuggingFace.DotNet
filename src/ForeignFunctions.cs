@@ -10,7 +10,7 @@ namespace Tokenizers.HuggingFace.Internal;
 internal static partial class ForeignFunctions
 {
     [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    static extern void free_buffer(nuint ptr, nuint len);
+    static extern void lib_tokenizers_free_buffer(nuint ptr, nuint len);
 
     static void ThrowErrors(Int32 status, Span<byte> buf, nuint ptr, nuint len)
     {
@@ -20,7 +20,7 @@ internal static partial class ForeignFunctions
         {
             Error err = new();
             err = Error.Parser.ParseFrom(buf);
-            free_buffer(ptr, len);
+            lib_tokenizers_free_buffer(ptr, len);
             details = err.Details;
         }
         switch (callStatus)
@@ -106,7 +106,7 @@ internal static partial class ForeignFunctions
                 Span<byte> span = new((void*)outPtr, (int)outLen);
                 ThrowErrors(result, span, outPtr, outLen);
                 var res = parser.ParseFrom(span);
-                free_buffer(outPtr, outLen);
+                lib_tokenizers_free_buffer(outPtr, outLen);
                 return res;
             }
         }

@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 
 using Tokenizers.HuggingFace.Internal;
+using Tokenizers.HuggingFace.Trainers;
 using Normalizer = Tokenizers.HuggingFace.Normalizers.Normalizer;
 using PreTokenizer = Tokenizers.HuggingFace.PreTokenizers.PreTokenizer;
 
@@ -9,15 +10,19 @@ namespace Tokenizers.HuggingFace.Tokenizer;
 internal static class TokenizerForeignFunctions
 {
     [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern Int32 encode(nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
+    public static extern Int32 lib_tokenizers_encode(nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
     [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern Int32 decode(nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
+    public static extern Int32 lib_tokenizers_decode(nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
     [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern Int32 tokenizer_from_file(out nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
+    public static extern Int32 lib_tokenizers_set_encode_special_tokens(nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
     [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern Int32 tokenizer_from_train(out nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
+    public static extern Int32 lib_tokenizers_add_tokens(nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
     [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void free_tokenizer(nuint instancePtr);
+    public static extern Int32 lib_tokenizers_tokenizer_from_file(out nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
+    [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
+    public static extern Int32 lib_tokenizers_tokenizer_from_train(out nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
+    [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
+    public static extern void lib_tokenizers_free_tokenizer(nuint instancePtr);
 }
 /// <summary>
 /// A class to manage a Tokenizer
@@ -37,7 +42,7 @@ public class Tokenizer : ForeignInstance
     public static Tokenizer FromFile(string path)
     {
         return new(ForeignFunctions.CreateNewArgsResult(
-            TokenizerForeignFunctions.tokenizer_from_file,
+            TokenizerForeignFunctions.lib_tokenizers_tokenizer_from_file,
             new Internal.Tokenizer.TokenizerFromFile { File = path }
         ));
     }
@@ -70,10 +75,10 @@ public class Tokenizer : ForeignInstance
         {
             Files = { files },
             SavePath = savePath,
-            Pretty = pretty
+            Pretty = pretty,
+            Model = model,
+            Trainer = trainer
         };
-        trainingParams.Model = model;
-        trainingParams.Trainer = trainer;
         if (normalizer != null)
             trainingParams.Normalizer = normalizer.InstancePtr;
         if (preTokenizer != null)
@@ -93,7 +98,7 @@ public class Tokenizer : ForeignInstance
         if (padding != null)
             trainingParams.Padding = padding;
         return new(ForeignFunctions.CreateNewArgsResult(
-            TokenizerForeignFunctions.tokenizer_from_train,
+            TokenizerForeignFunctions.lib_tokenizers_tokenizer_from_train,
             trainingParams
         ));
     }
@@ -113,7 +118,7 @@ public class Tokenizer : ForeignInstance
         if (InstancePtr == 0)
             throw new ObjectDisposedException("Tokenizer");
         return ForeignFunctions.MethodArgsResult<Internal.Tokenizer.DecodeResult, Internal.Tokenizer.DecodeParams>(
-            TokenizerForeignFunctions.decode,
+            TokenizerForeignFunctions.lib_tokenizers_decode,
             InstancePtr,
             new Internal.Tokenizer.DecodeParams
             {
@@ -152,13 +157,16 @@ public class Tokenizer : ForeignInstance
     /// When false (default) this helps improve performance since unused data is not serialized/deserialized preventing over fetching.
     /// If false the return will only contain 1 <see cref="Encoding"/>
     /// </param>
+    /// <param name="charOffsets">
+    /// Uses offsets relative to chars instead of bytes
+    /// </param>
     /// <returns>A collection of Encodings with the contents as specified by the parameters</returns>
-    /// <exception cref="Errors.TokenizerEncodingException"></exception>"
+    /// <exception cref="Errors.TokenizerEncodingException"></exception>
     /// <remarks>
     /// It's possible for this method to throw other types of exceptions like (<see cref="Errors.InvalidBufferException"/>, <see cref="Errors.InvalidPointerException"/>, etc)<br/>
     /// This indicates an issue with the library, please open an issue at <see href="https://github.com/IgnaciodelaTorreArias/Tokenizers.HuggingFace.DotNet">GitHub</see>
     /// </remarks>
-    public IEnumerable<Encoding> Encode(string input, bool addSpecialTokens, string? input2 = null, bool includeTypeIds = false, bool includeTokens = false, bool includeWords = false, bool includeOffsets = false, bool includeSpecialTokensMask = false, bool includeAttentionMask = false, bool includeOverflowing = false)
+    public IEnumerable<Encoding> Encode(string input, bool addSpecialTokens, string? input2 = null, bool includeTypeIds = false, bool includeTokens = false, bool includeWords = false, bool includeOffsets = false, bool includeSpecialTokensMask = false, bool includeAttentionMask = false, bool includeOverflowing = false, bool charOffsets = false)
     {
         if (InstancePtr == 0)
             throw new ObjectDisposedException("Tokenizer");
@@ -172,18 +180,57 @@ public class Tokenizer : ForeignInstance
             IncludeOffsets = includeOffsets,
             IncludeSpecialTokensMask = includeSpecialTokensMask,
             IncludeAttentionMask = includeAttentionMask,
-            IncludeOverflowing = includeOverflowing
+            IncludeOverflowing = includeOverflowing,
+            CharOffsets = charOffsets
         };
         if (input2 != null)
             encodeParams.Input2 = input2;
         return ForeignFunctions.MethodArgsResult<Internal.Tokenizer.EncodeResult, Internal.Tokenizer.EncodeParams>(
-            TokenizerForeignFunctions.encode,
+            TokenizerForeignFunctions.lib_tokenizers_encode,
             InstancePtr,
             encodeParams,
             Internal.Tokenizer.EncodeResult.Parser
         ).Encodings.AsEnumerable();
     }
-
+    /// <summary>
+    /// Set the added vocab’s splitting scheme
+    /// </summary>
+    /// <param name="value"></param>
+    public void SetEncodeSpecialTokens(bool value)
+    {
+        if (InstancePtr == 0)
+            throw new ObjectDisposedException("Tokenizer");
+        var setEncodeSpecialTokensParams = new Internal.Tokenizer.SetEncodeSpecialTokensParams
+        {
+            Value = value
+        };
+        ForeignFunctions.MethodArgsResult<Internal.Tokenizer.SetEncodeSpecialTokensParams>(
+            TokenizerForeignFunctions.lib_tokenizers_set_encode_special_tokens,
+            InstancePtr,
+            setEncodeSpecialTokensParams
+        );
+    }
+    /// <summary>
+    /// Set the added vocab’s splitting scheme
+    /// </summary>
+    /// <param name="tokens">Tokens to be added to the vocabulary</param>
+    /// <param name="special">Whether the tokens should be added as special tokens</param>
+    /// <exception cref="Errors.TokenizerAddedVocabException"></exception>
+    public void SetEncodeSpecialTokens(IEnumerable<AddedToken> tokens, bool special)
+    {
+        if (InstancePtr == 0)
+            throw new ObjectDisposedException("Tokenizer");
+        var addTokenParams = new Internal.Tokenizer.AddTokenParams
+        {
+            Special = special,
+        };
+        addTokenParams.Tokens.AddRange(tokens);
+        ForeignFunctions.MethodArgsResult<Internal.Tokenizer.AddTokenParams>(
+            TokenizerForeignFunctions.lib_tokenizers_add_tokens,
+            InstancePtr,
+            addTokenParams
+        );
+    }
     internal override FreeDelegate FreeFunc() =>
-        TokenizerForeignFunctions.free_tokenizer;
+        TokenizerForeignFunctions.lib_tokenizers_free_tokenizer;
 }

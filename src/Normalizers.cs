@@ -4,20 +4,19 @@ using Google.Protobuf;
 
 using Tokenizers.HuggingFace.Internal.Normalizers;
 using Tokenizers.HuggingFace.Internal;
-using Tokenizers.HuggingFace.PipelineString;
 
 namespace Tokenizers.HuggingFace.Normalizers;
 
 internal static class NormalizersForeignFunctions
 {
     [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern Int32 normalize(nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
+    public static extern Int32 lib_tokenizers_normalize(nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
 
     [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern Int32 new_normalizer_wrapper(out nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
+    public static extern Int32 lib_tokenizers_new_normalizer_wrapper(out nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
 
     [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void free_normalizer_wrapper(nuint instancePtr);
+    public static extern void lib_tokenizers_free_normalizer_wrapper(nuint instancePtr);
 }
 
 /// <summary>
@@ -29,7 +28,7 @@ abstract public class Normalizer : ForeignInstance
     internal Normalizer(NormalizerWrapper param)
     {
         InstancePtr = ForeignFunctions.CreateNewArgsResult(
-            NormalizersForeignFunctions.new_normalizer_wrapper,
+            NormalizersForeignFunctions.lib_tokenizers_new_normalizer_wrapper,
             param
         );
     }
@@ -47,13 +46,13 @@ abstract public class Normalizer : ForeignInstance
         if (InstancePtr == 0)
             throw new ObjectDisposedException("Normalizer");
         ForeignFunctions.MethodArgsResult<NormalizeParams>(
-            NormalizersForeignFunctions.normalize,
+            NormalizersForeignFunctions.lib_tokenizers_normalize,
             InstancePtr,
             new NormalizeParams { PipelineString = pipelineString.InstancePtr }
         );
     }
     internal override FreeDelegate FreeFunc() =>
-        NormalizersForeignFunctions.free_normalizer_wrapper;
+        NormalizersForeignFunctions.lib_tokenizers_free_normalizer_wrapper;
 }
 
 /// <summary>
