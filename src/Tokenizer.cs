@@ -7,22 +7,35 @@ using PreTokenizer = Tokenizers.HuggingFace.PreTokenizers.PreTokenizer;
 
 namespace Tokenizers.HuggingFace.Tokenizer;
 
-internal static class TokenizerForeignFunctions
+internal static partial class TokenizerForeignFunctions
 {
-    [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern Int32 lib_tokenizers_encode(nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
-    [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern Int32 lib_tokenizers_decode(nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
-    [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern Int32 lib_tokenizers_set_encode_special_tokens(nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
-    [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern Int32 lib_tokenizers_add_tokens(nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
-    [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern Int32 lib_tokenizers_tokenizer_from_file(out nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
-    [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern Int32 lib_tokenizers_tokenizer_from_train(out nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
-    [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void lib_tokenizers_free_tokenizer(nuint instancePtr);
+    [LibraryImport("tokenizers_proto", EntryPoint = "lib_tokenizers_encode")]
+    [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+    public static partial Int32 Encode(nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
+
+    [LibraryImport("tokenizers_proto", EntryPoint = "lib_tokenizers_decode")]
+    [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+    public static partial Int32 Decode(nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
+
+    [LibraryImport("tokenizers_proto", EntryPoint = "lib_tokenizers_set_encode_special_tokens")]
+    [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+    public static partial Int32 SetEncodeSpecialTokens(nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
+
+    [LibraryImport("tokenizers_proto", EntryPoint = "lib_tokenizers_add_tokens")]
+    [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+    public static partial Int32 AddTokens(nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
+
+    [LibraryImport("tokenizers_proto", EntryPoint = "lib_tokenizers_tokenizer_from_file")]
+    [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+    public static partial Int32 TokenizerFromFile(out nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
+
+    [LibraryImport("tokenizers_proto", EntryPoint = "lib_tokenizers_tokenizer_from_train")]
+    [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+    public static partial Int32 TokenizerFromTrain(out nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
+
+    [LibraryImport("tokenizers_proto", EntryPoint = "lib_tokenizers_free_tokenizer")]
+    [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+    public static partial void FreeTokenizer(nuint instancePtr);
 }
 /// <summary>
 /// A class to manage a Tokenizer
@@ -42,7 +55,7 @@ public class Tokenizer : ForeignInstance
     public static Tokenizer FromFile(string path)
     {
         return new(ForeignFunctions.CreateNewArgsResult(
-            TokenizerForeignFunctions.lib_tokenizers_tokenizer_from_file,
+            TokenizerForeignFunctions.TokenizerFromFile,
             new Internal.Tokenizer.TokenizerFromFile { File = path }
         ));
     }
@@ -98,7 +111,7 @@ public class Tokenizer : ForeignInstance
         if (padding != null)
             trainingParams.Padding = padding;
         return new(ForeignFunctions.CreateNewArgsResult(
-            TokenizerForeignFunctions.lib_tokenizers_tokenizer_from_train,
+            TokenizerForeignFunctions.TokenizerFromTrain,
             trainingParams
         ));
     }
@@ -118,7 +131,7 @@ public class Tokenizer : ForeignInstance
         if (InstancePtr == 0)
             throw new ObjectDisposedException("Tokenizer");
         return ForeignFunctions.MethodArgsResult<Internal.Tokenizer.DecodeResult, Internal.Tokenizer.DecodeParams>(
-            TokenizerForeignFunctions.lib_tokenizers_decode,
+            TokenizerForeignFunctions.Decode,
             InstancePtr,
             new Internal.Tokenizer.DecodeParams
             {
@@ -186,7 +199,7 @@ public class Tokenizer : ForeignInstance
         if (input2 != null)
             encodeParams.Input2 = input2;
         return ForeignFunctions.MethodArgsResult<Internal.Tokenizer.EncodeResult, Internal.Tokenizer.EncodeParams>(
-            TokenizerForeignFunctions.lib_tokenizers_encode,
+            TokenizerForeignFunctions.Encode,
             InstancePtr,
             encodeParams,
             Internal.Tokenizer.EncodeResult.Parser
@@ -205,7 +218,7 @@ public class Tokenizer : ForeignInstance
             Value = value
         };
         ForeignFunctions.MethodArgsResult<Internal.Tokenizer.SetEncodeSpecialTokensParams>(
-            TokenizerForeignFunctions.lib_tokenizers_set_encode_special_tokens,
+            TokenizerForeignFunctions.SetEncodeSpecialTokens,
             InstancePtr,
             setEncodeSpecialTokensParams
         );
@@ -226,11 +239,11 @@ public class Tokenizer : ForeignInstance
         };
         addTokenParams.Tokens.AddRange(tokens);
         ForeignFunctions.MethodArgsResult<Internal.Tokenizer.AddTokenParams>(
-            TokenizerForeignFunctions.lib_tokenizers_add_tokens,
+            TokenizerForeignFunctions.AddTokens,
             InstancePtr,
             addTokenParams
         );
     }
     internal override FreeDelegate FreeFunc() =>
-        TokenizerForeignFunctions.lib_tokenizers_free_tokenizer;
+        TokenizerForeignFunctions.FreeTokenizer;
 }

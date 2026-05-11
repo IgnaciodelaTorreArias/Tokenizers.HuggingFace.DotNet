@@ -7,16 +7,19 @@ using Tokenizers.HuggingFace.Internal;
 
 namespace Tokenizers.HuggingFace.Normalizers;
 
-internal static class NormalizersForeignFunctions
+internal static partial class NormalizersForeignFunctions
 {
-    [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern Int32 lib_tokenizers_normalize(nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
+    [LibraryImport("tokenizers_proto", EntryPoint = "lib_tokenizers_normalize")]
+    [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+    public static partial Int32 Normalize(nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
 
-    [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern Int32 lib_tokenizers_new_normalizer_wrapper(out nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
+    [LibraryImport("tokenizers_proto", EntryPoint = "lib_tokenizers_new_normalizer_wrapper")]
+    [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+    public static partial Int32 NewNormalizerWrapper(out nuint instancePtr, nuint ptr, nuint len, out nuint outPtr, out nuint outLen);
 
-    [DllImport("tokenizers_proto", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void lib_tokenizers_free_normalizer_wrapper(nuint instancePtr);
+    [LibraryImport("tokenizers_proto", EntryPoint = "lib_tokenizers_free_normalizer_wrapper")]
+    [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+    public static partial void FreeNormalizerWrapper(nuint instancePtr);
 }
 
 /// <summary>
@@ -28,7 +31,7 @@ abstract public class Normalizer : ForeignInstance
     internal Normalizer(NormalizerWrapper param)
     {
         InstancePtr = ForeignFunctions.CreateNewArgsResult(
-            NormalizersForeignFunctions.lib_tokenizers_new_normalizer_wrapper,
+            NormalizersForeignFunctions.NewNormalizerWrapper,
             param
         );
     }
@@ -46,13 +49,13 @@ abstract public class Normalizer : ForeignInstance
         if (InstancePtr == 0)
             throw new ObjectDisposedException("Normalizer");
         ForeignFunctions.MethodArgsResult<NormalizeParams>(
-            NormalizersForeignFunctions.lib_tokenizers_normalize,
+            NormalizersForeignFunctions.Normalize,
             InstancePtr,
             new NormalizeParams { PipelineString = pipelineString.InstancePtr }
         );
     }
     internal override FreeDelegate FreeFunc() =>
-        NormalizersForeignFunctions.lib_tokenizers_free_normalizer_wrapper;
+        NormalizersForeignFunctions.FreeNormalizerWrapper;
 }
 
 /// <summary>
