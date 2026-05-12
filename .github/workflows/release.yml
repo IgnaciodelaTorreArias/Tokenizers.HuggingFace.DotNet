@@ -42,7 +42,7 @@ jobs:
         with:
           user: lazy_engineer
       - name: publish to nuget
-        run: dotnet nuget push ./bin/*.nupkg --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://www.nuget.org/api/v2/package
+        run: dotnet nuget push ./bin/Release/*.nupkg --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://www.nuget.org/api/v2/package
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
         with:
