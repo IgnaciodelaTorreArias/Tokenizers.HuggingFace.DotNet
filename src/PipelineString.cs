@@ -22,7 +22,7 @@ internal static class PipelineStringForeignFunctions
 public class PipelineString : ForeignInstance
 {
     /// <inheritdoc cref="PipelineString"/>
-    /// <param name="original">Initial string without any transforamation</param>
+    /// <param name="original">Initial string without any transformation</param>
     public PipelineString(string original)
     {
         InstancePtr = ForeignFunctions.CreateNewArgsResult(
@@ -31,7 +31,7 @@ public class PipelineString : ForeignInstance
         );
     }
     /// <summary>
-    /// Use this method to see the current state of the <see cref="PipelineString"/> after transforamtions
+    /// Use this method to see the current state of the <see cref="PipelineString"/> after transformations
     /// </summary>
     /// <param name="offsetReferential"></param>
     /// <param name="offsetType"></param>
@@ -47,7 +47,7 @@ public class PipelineString : ForeignInstance
     {
         var r = ForeignFunctions.MethodArgsResult(
             PipelineStringForeignFunctions.lib_tokenizers_get_splits,
-            this.InstancePtr,
+            InstancePtr,
             new SplitParams
             {
                 OffsetReferential = offsetReferential,

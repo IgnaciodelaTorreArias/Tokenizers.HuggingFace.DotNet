@@ -43,8 +43,6 @@ abstract public class Normalizer : ForeignInstance
     /// </remarks>
     public void Normalize(PipelineString.PipelineString pipelineString)
     {
-        if (InstancePtr == 0)
-            throw new ObjectDisposedException("Normalizer");
         ForeignFunctions.MethodArgsResult<NormalizeParams>(
             NormalizersForeignFunctions.lib_tokenizers_normalize,
             InstancePtr,
@@ -99,10 +97,10 @@ public class Bert : Normalizer
             }
         })
     {
-        this.CleanText = cleanText;
-        this.HandleChineseChars = handleChineseChars;
-        this.StripAccents = stripAccents;
-        this.Lowercase = lowercase;
+        CleanText = cleanText;
+        HandleChineseChars = handleChineseChars;
+        StripAccents = stripAccents;
+        Lowercase = lowercase;
     }
 }
 /// <summary>
@@ -173,8 +171,8 @@ public class StripNormalizer : Normalizer
             }
         })
     {
-        this.StripLeft = stripLeft;
-        this.StripRight = stripRight;
+        StripLeft = stripLeft;
+        StripRight = stripRight;
     }
 }
 /// <summary>
@@ -203,7 +201,7 @@ public class Sequence : Normalizer
             Sequence = ForeignFunctions.ToSequence(normalizers)
         })
     {
-        this.Normalizers = normalizers;
+        Normalizers = normalizers;
     }
     internal override void Dispose(bool disposing)
     {
@@ -230,14 +228,14 @@ public class Prepend : Normalizer
     /// </summary>
     public readonly string Prepended;
     /// <inheritdoc cref="Prepend"/>
-    /// <param name="prepended">Initializar for: <see cref="Prepended"/></param>
+    /// <param name="prepended">Initializer for: <see cref="Prepended"/></param>
     public Prepend(string prepended) :
         base(new NormalizerWrapper
         {
             Prepend = new() { Prepend_ = prepended }
         })
     {
-        this.Prepended = prepended;
+        Prepended = prepended;
     }
 }
 /// <summary>
@@ -269,8 +267,8 @@ public class Replace : Normalizer
             }
         })
     {
-        this.Pattern = pattern;
-        this.Content = content;
+        Pattern = pattern;
+        Content = content;
     }
     /// <summary>
     /// Use this constructor to replace using a regex pattern for matches
@@ -287,8 +285,8 @@ public class Replace : Normalizer
             }
         })
     {
-        this.Pattern = pattern.ToString();
-        this.Content = content;
+        Pattern = pattern.ToString();
+        Content = content;
     }
 }
 /// <summary>
@@ -307,7 +305,7 @@ public class Precompiled : Normalizer
             Precompiled = new() { PrecompiledCharsmap = ByteString.CopyFrom(precompiledCharsmap) }
         })
     {
-        this.PrecompiledCharsmap = precompiledCharsmap;
+        PrecompiledCharsmap = precompiledCharsmap;
     }
 }
 

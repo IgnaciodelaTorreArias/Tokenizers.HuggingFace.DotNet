@@ -31,7 +31,7 @@ public class Tokenizer : ForeignInstance
 {
     internal Tokenizer(nuint addr)
     {
-        this.InstancePtr = addr;
+        InstancePtr = addr;
     }
     /// <summary>
     /// Loads a tokenizer from a JSON file
@@ -115,8 +115,6 @@ public class Tokenizer : ForeignInstance
     /// </remarks>
     public string Decode(IEnumerable<uint> ids, bool skipSpecialTokens)
     {
-        if (InstancePtr == 0)
-            throw new ObjectDisposedException("Tokenizer");
         return ForeignFunctions.MethodArgsResult<Internal.Tokenizer.DecodeResult, Internal.Tokenizer.DecodeParams>(
             TokenizerForeignFunctions.lib_tokenizers_decode,
             InstancePtr,
@@ -168,8 +166,6 @@ public class Tokenizer : ForeignInstance
     /// </remarks>
     public IEnumerable<Encoding> Encode(string input, bool addSpecialTokens, string? input2 = null, bool includeTypeIds = false, bool includeTokens = false, bool includeWords = false, bool includeOffsets = false, bool includeSpecialTokensMask = false, bool includeAttentionMask = false, bool includeOverflowing = false, bool charOffsets = false)
     {
-        if (InstancePtr == 0)
-            throw new ObjectDisposedException("Tokenizer");
         var encodeParams = new Internal.Tokenizer.EncodeParams
         {
             Input = input,
@@ -198,8 +194,6 @@ public class Tokenizer : ForeignInstance
     /// <param name="value"></param>
     public void SetEncodeSpecialTokens(bool value)
     {
-        if (InstancePtr == 0)
-            throw new ObjectDisposedException("Tokenizer");
         var setEncodeSpecialTokensParams = new Internal.Tokenizer.SetEncodeSpecialTokensParams
         {
             Value = value
@@ -211,15 +205,13 @@ public class Tokenizer : ForeignInstance
         );
     }
     /// <summary>
-    /// Set the added vocab’s splitting scheme
+    /// Add the given tokens to the added vocabulary
     /// </summary>
     /// <param name="tokens">Tokens to be added to the vocabulary</param>
     /// <param name="special">Whether the tokens should be added as special tokens</param>
     /// <exception cref="Errors.TokenizerAddedVocabException"></exception>
-    public void SetEncodeSpecialTokens(IEnumerable<AddedToken> tokens, bool special)
+    public void AddTokens(IEnumerable<AddedToken> tokens, bool special)
     {
-        if (InstancePtr == 0)
-            throw new ObjectDisposedException("Tokenizer");
         var addTokenParams = new Internal.Tokenizer.AddTokenParams
         {
             Special = special,

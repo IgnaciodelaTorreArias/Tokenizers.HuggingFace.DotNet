@@ -7,6 +7,7 @@ on:
       tokenizers_proto_version:
         required: true
 permissions:
+  id-token: write
   contents: write
 
 jobs:
@@ -36,8 +37,12 @@ jobs:
           done
       - name: run dotnet pack
         run: dotnet pack Tokenizers.HuggingFace.csproj -c Release -p:PackageVersion=${{ inputs.version }}
+      - uses: NuGet/login@v1.2.0
+        id: login
+        with:
+          user: lazy_engineer
       - name: publish to nuget
-        run: dotnet nuget push **/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push ./bin/*.nupkg --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://www.nuget.org/api/v2/package
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
         with:

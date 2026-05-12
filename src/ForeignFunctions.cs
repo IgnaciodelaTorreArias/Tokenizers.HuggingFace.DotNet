@@ -55,6 +55,8 @@ internal static partial class ForeignFunctions
                 throw new TokenizerEncodingException(details);
             case CallStatus.TokenizerDecodingErrorDetails:
                 throw new TokenizerDecodingException(details);
+            case CallStatus.TokenizerAddedVocabErrorDetails:
+                throw new TokenizerAddedVocabException(details);
         }
         if (status > 0)
             throw new Exception($"Unknown error occurred, code: {status}, details: {details}");
@@ -91,6 +93,8 @@ internal static partial class ForeignFunctions
         where I : IMessage<I>
         where R : IMessage<R>
     {
+        if (instancePtr == 0)
+            throw new ObjectDisposedException(null);
         byte[] buf = request.ToByteArray();
         unsafe
         {
@@ -114,6 +118,8 @@ internal static partial class ForeignFunctions
     internal static void MethodArgsResult<I>(_MethodFuncArgsResultDelegate func, nuint instancePtr, I request)
         where I : IMessage<I>
     {
+        if (instancePtr == 0)
+            throw new ObjectDisposedException(null);
         byte[] buf = request.ToByteArray();
         unsafe
         {

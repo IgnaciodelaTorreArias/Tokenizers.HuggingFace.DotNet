@@ -41,8 +41,6 @@ public class PreTokenizer : ForeignInstance
     /// </remarks>
     public void PreTokenize(PipelineString.PipelineString pipelineString)
     {
-        if (InstancePtr == 0)
-            throw new ObjectDisposedException("PreTokenizer");
         ForeignFunctions.MethodArgsResult<PreTokenizeParams>(
             PreTokenizersForeignFunctions.lib_tokenizers_pre_tokenize,
             InstancePtr,
@@ -93,13 +91,13 @@ public class ByteLevel : PreTokenizer
             }
         })
     {
-        this.AddPrefixSpace = addPrefixSpace;
-        this.TrimOffsets = trimOffsets;
-        this.UseRegex = useRegex;
+        AddPrefixSpace = addPrefixSpace;
+        TrimOffsets = trimOffsets;
+        UseRegex = useRegex;
     }
 }
 /// <summary>
-/// Replaces all the spaces with the povided meta character and then splits on this character
+/// Replaces all the spaces with the provided meta character and then splits on this character
 /// </summary>
 public class Metaspace : PreTokenizer
 {
@@ -110,7 +108,7 @@ public class Metaspace : PreTokenizer
     /// <inheritdoc cref="Decoders.PrependScheme"/>
     public readonly PrependScheme PrependScheme;
     /// <summary>
-    /// Whether spliting at the end of the replacement
+    /// Whether splitting at the end of the replacement
     /// </summary>
     public readonly bool Split;
     /// <inheritdoc cref="Metaspace"/>
@@ -128,9 +126,9 @@ public class Metaspace : PreTokenizer
             }
         })
     {
-        this.ReplacementChar = replacementChar;
-        this.PrependScheme = prependScheme;
-        this.Split = split;
+        ReplacementChar = replacementChar;
+        PrependScheme = prependScheme;
+        Split = split;
     }
 }
 /// <summary>
@@ -173,27 +171,27 @@ public class Delimiter : PreTokenizer
             }
         })
     {
-        this.DelimiterChar = delimiterChar;
+        DelimiterChar = delimiterChar;
     }
 }
 /// <summary>
 /// Allows concatenating multiple other <see cref="PreTokenizer"/> as a Sequence. All the pre-tokenizers are run in sequence in the given order
 /// </summary>
-public class Squence : PreTokenizer
+public class Sequence : PreTokenizer
 {
     /// <summary>
     /// The pre-tokenizers that will be run in sequence
     /// </summary>
     public readonly IEnumerable<PreTokenizer> PreTokenizers;
-    /// <inheritdoc cref="Tokenizers.HuggingFace.PreTokenizers.Squence"/>
+    /// <inheritdoc cref="Tokenizers.HuggingFace.PreTokenizers.Sequence"/>
     /// <param name="preTokenizers">A collection of <see cref="PreTokenizer"/> instances to initialize <see cref="PreTokenizers"/>.</param>
-    public Squence(IEnumerable<PreTokenizer> preTokenizers) :
+    public Sequence(IEnumerable<PreTokenizer> preTokenizers) :
         base(new PreTokenizerWrapper
         {
             Sequence = ForeignFunctions.ToSequence(preTokenizers)
         })
     {
-        this.PreTokenizers = preTokenizers;
+        PreTokenizers = preTokenizers;
     }
     internal override void Dispose(bool disposing)
     {
@@ -203,12 +201,12 @@ public class Squence : PreTokenizer
     }
 }
 /// <summary>
-/// Gives control on spliting behavior by using regex to determine the spliting points
+/// Gives control on splitting behavior by using regex to determine the splitting points
 /// </summary>
 public class Split : PreTokenizer
 {
     /// <summary>
-    /// The pattern used to find spliting points <br/>
+    /// The pattern used to find splitting points <br/>
     /// Even though here is a string, internally is managed as regex pattern
     /// </summary>
     public readonly string Pattern;
@@ -216,11 +214,11 @@ public class Split : PreTokenizer
     public readonly SplitDelimiterBehavior Behavior;
     /// <summary>
     /// Whether to invert the <see cref="Pattern"/><br/>
-    /// Usefull whe you use <see cref="Split.Split(Regex, SplitDelimiterBehavior, bool)"/>
+    /// Useful whe you use <see cref="Split.Split(Regex, SplitDelimiterBehavior, bool)"/>
     /// </summary>
     public readonly bool Invert;
     /// <summary>
-    /// Scapes the <paramref name="pattern"/> and uses regex to the spliting
+    /// Scapes the <paramref name="pattern"/> and uses regex to the splitting
     /// </summary>
     /// <param name="pattern">Initializer for: <see cref="Pattern"/></param>
     /// <param name="behavior">Initializer for: <see cref="Behavior"/></param>
@@ -236,9 +234,9 @@ public class Split : PreTokenizer
             }
         })
     {
-        this.Pattern = pattern;
-        this.Behavior = behavior;
-        this.Invert = invert;
+        Pattern = pattern;
+        Behavior = behavior;
+        Invert = invert;
     }
     /// <summary>
     /// Uses the regex as you specify it
@@ -257,9 +255,9 @@ public class Split : PreTokenizer
             }
         })
     {
-        this.Pattern = pattern.ToString();
-        this.Behavior = behavior;
-        this.Invert = invert;
+        Pattern = pattern.ToString();
+        Behavior = behavior;
+        Invert = invert;
     }
 }
 /// <summary>
@@ -280,7 +278,7 @@ public class Punctuation : PreTokenizer
             }
         })
     {
-        this.Behavior = behavior;
+        Behavior = behavior;
     }
 }
 /// <summary>
@@ -303,13 +301,13 @@ public class Digits : PreTokenizer
             }
         })
     {
-        this.IndividualDigits = individualDigits;
+        IndividualDigits = individualDigits;
     }
 }
 /// <summary>
 /// This pre-tokenizer splits on characters that belong to different language family.<br/>
 /// It roughly follows <see href="https://github.com/google/sentencepiece/blob/master/data/Scripts.txt">Scripts.txt</see>.<br/>
-/// Actually Hiragana and Katakana are fused with Han, and 0x30FC is Han too. This mimicks SentencePiece Unigram implementation.
+/// Actually Hiragana and Katakana are fused with Han, and 0x30FC is Han too. This mimics SentencePiece Unigram implementation.
 /// </summary>
 public class UnicodeScripts : PreTokenizer
 {
@@ -336,6 +334,6 @@ public class FixedLength : PreTokenizer
             }
         })
     {
-        this.Length = length;
+        Length = length;
     }
 }
